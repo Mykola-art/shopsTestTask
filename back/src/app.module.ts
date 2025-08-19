@@ -1,10 +1,24 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import {TypeOrmModule} from "@nestjs/typeorm";
+import {ConfigModule, ConfigService} from "@nestjs/config";
+import {envValidationSchema} from "./config/env.validation";
+import {typeormModuleOptions} from "./config/typeorm.config";
+import {UsersModule} from "./modules/users/users.module";
+import {AuthModule} from "./modules/auth/auth.module";
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env'],
+      validationSchema: envValidationSchema,
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => typeormModuleOptions(config),
+    }),
+    UsersModule,
+    AuthModule
+  ]
 })
 export class AppModule {}
