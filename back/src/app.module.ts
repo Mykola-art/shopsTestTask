@@ -5,6 +5,8 @@ import {envValidationSchema} from "./config/env.validation";
 import {typeormModuleOptions} from "./config/typeorm.config";
 import {UsersModule} from "./modules/users/users.module";
 import {AuthModule} from "./modules/auth/auth.module";
+import { StoresModule } from './modules/stores/stores.module';
+import { ProductsModule } from './modules/products/products.module';
 
 @Module({
   imports: [
@@ -18,7 +20,9 @@ import {AuthModule} from "./modules/auth/auth.module";
       useFactory: (config: ConfigService) => typeormModuleOptions(config),
     }),
     UsersModule,
-    AuthModule
+    AuthModule,
+    StoresModule,
+    ProductsModule
   ]
 })
 export class AppModule {}

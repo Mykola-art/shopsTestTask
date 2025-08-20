@@ -6,7 +6,7 @@ import {AvailabilityHoursInterface} from "../common/interfaces";
 @Entity({ name: 'stores' })
 export class StoreEntity {
 	@PrimaryGeneratedColumn()
-	id: string;
+	id: number;
 
 	@Column({ unique: true })
 	slug: string;

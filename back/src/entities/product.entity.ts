@@ -5,7 +5,7 @@ import {AvailabilityHoursInterface, ModifierInterface} from "../common/interface
 @Entity({ name: 'products' })
 export class ProductEntity {
 	@PrimaryGeneratedColumn()
-	id: string;
+	id: number;
 
 	@ManyToOne(() => StoreEntity, store => store.products)
 	store: StoreEntity;
