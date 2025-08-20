@@ -1,11 +1,16 @@
-import { Controller, Post, Get, Patch, Delete, Param, Body } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {Controller, Post, Get, Patch, Delete, Param, Body, UseGuards, Query} from '@nestjs/common';
+import {ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery} from '@nestjs/swagger';
 import { StoresService } from './stores.service';
 import { CreateStoreDto, UpdateStoreDto } from './dtos';
-import { StoreEntity } from '../../entities';
+import {StoreEntity, UserEntity} from '../../entities';
+import {GetUser} from "../../decorators";
+import {AuthGuard, StoreOwnerGuard} from "../../guards";
+import {PaginationResponseDto} from "../../common/dtos";
+import {FindStoresQueryDto} from "./dtos/find.stores.query.dto";
 
 @ApiTags('Stores')
-@ApiBearerAuth()
+@ApiBearerAuth('access-token')
+@UseGuards(AuthGuard)
 @Controller('stores')
 export class StoresController {
 	constructor(private readonly storesService: StoresService) {}
@@ -13,16 +18,29 @@ export class StoresController {
 	@Post()
 	@ApiOperation({ summary: 'Create new store' })
 	@ApiResponse({ status: 201, description: 'Store successfully created', type: StoreEntity })
-	create(@Body() dto: CreateStoreDto): Promise<StoreEntity> {
-		// adminId можна брати з @GetUser()
-		return this.storesService.create(1, dto);
+	create(@Body() dto: CreateStoreDto, @GetUser() user: UserEntity): Promise<StoreEntity> {
+		return this.storesService.create(user.id, dto);
 	}
 
 	@Get()
-	@ApiOperation({ summary: 'Get all stores' })
-	@ApiResponse({ status: 200, type: [StoreEntity] })
-	findAll(): Promise<StoreEntity[]> {
-		return this.storesService.findAll();
+	@ApiOperation({ summary: 'Get all stores (pagination + filters)' })
+	@ApiResponse({ status: 200, description: 'Store successfully returned', type: PaginationResponseDto<StoreEntity> })
+	@ApiQuery({ type: FindStoresQueryDto })
+	findAll(
+		@Query() query: FindStoresQueryDto
+	):Promise<PaginationResponseDto<StoreEntity>> {
+		return this.storesService.findAll(query);
+	}
+
+	@Get('my')
+	@ApiOperation({ summary: 'Get stores of current user (admin)' })
+	@ApiResponse({
+		status: 200,
+		description: 'Returns the list of stores owned by the current user',
+		type: [StoreEntity],
+	})
+	getMyStores(@GetUser() user: UserEntity): Promise<StoreEntity[]> {
+		return this.storesService.getMyStores(user.id);
 	}
 
 	@Get(':id')
@@ -33,6 +51,7 @@ export class StoresController {
 	}
 
 	@Patch(':id')
+	@UseGuards(StoreOwnerGuard)
 	@ApiOperation({ summary: 'Update store' })
 	@ApiResponse({ status: 200, type: StoreEntity })
 	update(@Param('id') id: number, @Body() dto: UpdateStoreDto): Promise<StoreEntity> {
@@ -40,6 +59,7 @@ export class StoresController {
 	}
 
 	@Delete(':id')
+	@UseGuards(StoreOwnerGuard)
 	@ApiOperation({ summary: 'Delete store' })
 	@ApiResponse({ status: 200, description: 'Store deleted' })
 	remove(@Param('id') id: number): Promise<void> {

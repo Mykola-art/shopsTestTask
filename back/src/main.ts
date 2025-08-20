@@ -14,6 +14,7 @@ async function bootstrap() {
     .setTitle('STORES API')
     .setDescription('Documentation of api for Per Diem Test task')
     .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
