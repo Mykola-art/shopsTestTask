@@ -5,6 +5,7 @@ import { StoreEntity } from '../../entities';
 import { CreateStoreDto, UpdateStoreDto } from './dtos';
 import {PaginationResponseDto} from "../../common/dtos";
 import {FindStoresQueryDto} from "./dtos/find.stores.query.dto";
+import {ConvertTimeByTimezone} from "../../utils";
 
 @Injectable()
 export class StoresService {
@@ -25,7 +26,7 @@ export class StoresService {
 		query: FindStoresQueryDto
 	): Promise<PaginationResponseDto<StoreEntity>> {
 
-		const {page, limit, name, address, day, from, to} = query
+		const {page, limit, timezone, name, address, day, from, to} = query
 		const qb = this.storeRepository.createQueryBuilder('store');
 
 		if (name) {
@@ -36,11 +37,24 @@ export class StoresService {
 			qb.andWhere('LOWER(store.address) LIKE LOWER(:address)', { address: `%${address}%` });
 		}
 
+		let fromInStoreTz = from;
+		let toInStoreTz = to;
+
+		if (timezone && day && (from && to)) {
+			const store = await qb.getOne();
+			const storeTimezone = store?.timezone;
+
+			if (storeTimezone) {
+				fromInStoreTz = ConvertTimeByTimezone(from, timezone, storeTimezone);
+				toInStoreTz   = ConvertTimeByTimezone(to, timezone, storeTimezone);
+			}
+		}
+
 		if (day && from && to) {
 			qb.andWhere(
 				`store.operatingHours -> :day ->> 'from' <= :from
        AND store.operatingHours -> :day ->> 'to'   >= :to`,
-				{ day, from, to },
+				{ day, from: fromInStoreTz, to: toInStoreTz },
 			);
 		}
 

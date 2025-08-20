@@ -19,7 +19,7 @@ export class AuthService {
 
 		const user = await this.userService.create(data);
 
-		const tokens = await this.generateTokens(user.id);
+		const tokens = await this.generateTokens(user);
 		await this.updateRefreshToken(user.id, tokens.refreshToken);
 
 		return tokens;
@@ -28,7 +28,7 @@ export class AuthService {
 	async login(data: UserDto): Promise<TokenResponseDto> {
 		const user = await this.validateUser(data.email, data.password);
 
-		const tokens = await this.generateTokens(user.id);
+		const tokens = await this.generateTokens(user);
 		await this.updateRefreshToken(user.id, tokens.refreshToken);
 
 		return tokens;
@@ -46,10 +46,19 @@ export class AuthService {
 		return this.jwtService.sign(payload, { expiresIn });
 	}
 
-	private async generateTokens(userId: number): Promise<TokenResponseDto> {
-		const accessToken = this.generateToken({ id: userId }, '15m');
-		const refreshToken = this.generateToken({ id: userId }, '7d');
-		return { accessToken, refreshToken };
+	private async generateTokens(user: UserEntity): Promise<TokenResponseDto> {
+		const accessToken = this.generateToken({ id: user.id }, '15m');
+		const refreshToken = this.generateToken({ id: user.id }, '7d');
+		return {
+			accessToken,
+			refreshToken,
+			userPayload: {
+				userId: user.id,
+				email: user.email,
+				role: user.role,
+				isHaveStores: !!user.stores.length
+			}
+		};
 	}
 
 	private async updateRefreshToken(userId: number, refreshToken: string) {
@@ -64,7 +73,7 @@ export class AuthService {
 		const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
 		if (!isValid) throw new UnauthorizedException('Invalid refresh token');
 
-		const tokens = await this.generateTokens(user.id);
+		const tokens = await this.generateTokens(user);
 		await this.updateRefreshToken(user.id, tokens.refreshToken);
 
 		return tokens;

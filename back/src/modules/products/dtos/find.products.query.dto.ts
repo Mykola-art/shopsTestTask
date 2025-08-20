@@ -15,6 +15,12 @@ export class FindProductsQueryDto {
 	@IsNumber()
 	limit?: number = 10;
 
+	@ApiProperty({ example: 'Europe/London', required: false })
+	@IsOptional()
+	@IsString()
+	timezone?: string;
+
+
 	@ApiProperty({ example: 'Pizza', required: false })
 	@IsOptional()
 	@IsString()

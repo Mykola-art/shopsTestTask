@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { ProductEntity } from '../../entities';
 import { CreateProductDto, UpdateProductDto, FindProductsQueryDto } from './dtos';
 import { PaginationResponseDto } from '../../common/dtos';
+import {ConvertTimeByTimezone} from "../../utils";
 
 @Injectable()
 export class ProductsService {
@@ -18,8 +19,9 @@ export class ProductsService {
 	}
 
 	async findAll(query: FindProductsQueryDto): Promise<PaginationResponseDto<ProductEntity>> {
-		const { page = 1, limit = 10, name, priceFrom, priceTo, day, from, to } = query;
-		const qb = this.productRepository.createQueryBuilder('product');
+		const { page = 1, limit = 10, name, priceFrom, priceTo, day, from, to, timezone } = query;
+		const qb = this.productRepository.createQueryBuilder('product')
+			.leftJoinAndSelect('product.store', 'store');
 
 		if (name) {
 			qb.andWhere('LOWER(product.name) LIKE LOWER(:name)', { name: `%${name}%` });
@@ -33,27 +35,41 @@ export class ProductsService {
 			qb.andWhere('product.price <= :priceTo', { priceTo });
 		}
 
+
+		let fromInStoreTz = from;
+		let toInStoreTz = to;
+
+		if (timezone && day && (from && to)) {
+			const store = await qb.getOne();
+			const storeTimezone = store?.store?.timezone;
+
+			if (storeTimezone) {
+				fromInStoreTz = ConvertTimeByTimezone(from, timezone, storeTimezone);
+				toInStoreTz   = ConvertTimeByTimezone(to, timezone, storeTimezone);
+			}
+		}
+
 		if (day && from && to) {
 			qb.andWhere(
 				`product.availability -> :day ->> 'from' <= :from AND product.availability -> :day ->> 'to' >= :to`,
-				{ day, from, to },
+				{ day, from: fromInStoreTz, to: toInStoreTz },
 			);
 		}
 
 		qb.skip((page - 1) * limit).take(limit);
 
 		const [items, total] = await qb.getManyAndCount();
+
 		return {
 			items,
 			meta: {
 				page,
 				pageSize: limit,
 				totalPages: Math.ceil(total / limit),
-				total
+				total,
 			},
 		};
 	}
-
 	async findOne(id: number): Promise<ProductEntity> {
 		const product = await this.productRepository.findOneBy({ id });
 		if (!product) throw new NotFoundException('Product not found');

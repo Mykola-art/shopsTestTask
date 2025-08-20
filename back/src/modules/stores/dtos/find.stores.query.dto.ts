@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 import { IsOptional, IsString, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -14,6 +14,11 @@ export class FindStoresQueryDto {
 	@Type(() => Number)
 	@IsInt()
 	limit: number = 10;
+
+	@ApiProperty({ example: 'Europe/London', required: false })
+	@IsOptional()
+	@IsString()
+	timezone?: string;
 
 	@ApiPropertyOptional({ example: 'Shop name' })
 	@IsOptional()

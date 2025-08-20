@@ -21,7 +21,7 @@ export class UsersService {
 	}
 
 	async getByEmail(email: string): Promise<UserEntity | null>{
-		return this.usersRepository.findOne({where: {email}})
+		return this.usersRepository.findOne({where: {email}, relations: ["stores"]})
 	}
 
 	async updateRefreshToken(userId: number, refreshToken: string) {
