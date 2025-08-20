@@ -1,7 +1,7 @@
 import {CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException} from "@nestjs/common";
-import {ProductsService} from "../modules/products/products.service";
 import {UserEntity} from "../entities";
 import {StoresService} from "../modules/stores/stores.service";
+import {UserRoleEnum} from "../common/enums";
 
 @Injectable()
 export class StoreOwnerGuard implements CanActivate {
@@ -10,6 +10,8 @@ export class StoreOwnerGuard implements CanActivate {
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
 		const user: UserEntity = request.user;
+
+		if(user.role === UserRoleEnum.ADMIN) return true
 
 		const storeId = request.params.id ? Number(request.params.id) : request.body.storeId;
 

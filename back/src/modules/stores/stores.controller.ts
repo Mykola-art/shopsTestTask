@@ -1,7 +1,7 @@
 import {Controller, Post, Get, Patch, Delete, Param, Body, UseGuards, Query} from '@nestjs/common';
 import {ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery} from '@nestjs/swagger';
 import { StoresService } from './stores.service';
-import { CreateStoreDto, UpdateStoreDto } from './dtos';
+import {CreateStoreDto, GetActiveStoresQueryDto, UpdateStoreDto} from './dtos';
 import {StoreEntity, UserEntity} from '../../entities';
 import {GetUser} from "../../decorators";
 import {AuthGuard, StoreOwnerGuard} from "../../guards";
@@ -41,6 +41,19 @@ export class StoresController {
 	})
 	getMyStores(@GetUser() user: UserEntity): Promise<StoreEntity[]> {
 		return this.storesService.getMyStores(user.id);
+	}
+
+	@Get('active')
+	@ApiOperation({ summary: 'Get active stores for a store at a specific time' })
+	@ApiResponse({
+		status: 200,
+		description: 'Returns paginated list of active stores',
+		type: PaginationResponseDto<StoreEntity>,
+	})
+	async getActiveStores(
+		@Query() query: GetActiveStoresQueryDto,
+	): Promise<PaginationResponseDto<StoreEntity>> {
+		return this.storesService.getActiveStores(query)
 	}
 
 	@Get(':id')

@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { StoreEntity } from '../../entities';
-import { CreateStoreDto, UpdateStoreDto } from './dtos';
+import {DateTime} from 'luxon';
+import {StoreEntity} from '../../entities';
+import {CreateStoreDto, GetActiveStoresQueryDto, UpdateStoreDto} from './dtos';
 import {PaginationResponseDto} from "../../common/dtos";
 import {FindStoresQueryDto} from "./dtos/find.stores.query.dto";
 import {ConvertTimeByTimezone} from "../../utils";
@@ -88,6 +89,44 @@ export class StoresService {
 		return this.storeRepository.find({
 			where: { admin: { id: userId } },
 		});
+	}
+
+	async getActiveStores(query: GetActiveStoresQueryDto): Promise<PaginationResponseDto<StoreEntity>> {
+		const { timezone, time, page, limit } = query;
+		const day = DateTime.now().setZone(timezone).toFormat('EEEE');
+
+		const qb = this.storeRepository
+			.createQueryBuilder('store')
+
+
+		const store = await qb.getOne();
+		const storeTimezone = store?.timezone;
+
+		let timeInStore = time;
+
+		if (timezone && storeTimezone) {
+			timeInStore = ConvertTimeByTimezone(time, timezone, storeTimezone);
+		}
+
+		qb.andWhere(
+			`store.operatingHours -> :day ->> 'from' <= :time
+     AND store.operatingHours -> :day ->> 'to' >= :time`,
+			{ day, time: timeInStore },
+		);
+
+		qb.skip((page - 1) * limit).take(limit);
+
+		const [items, total] = await qb.getManyAndCount();
+
+		return {
+			items,
+			meta: {
+				page,
+				pageSize: limit,
+				total,
+				totalPages: Math.ceil(total / limit),
+			},
+		};
 	}
 
 	async update(id: number, dto: UpdateStoreDto): Promise<StoreEntity> {

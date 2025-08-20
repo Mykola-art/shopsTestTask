@@ -15,6 +15,12 @@ export class FindProductsQueryDto {
 	@IsNumber()
 	limit?: number = 10;
 
+	@ApiProperty({ example: 1, description: 'ID магазину' })
+	@IsOptional()
+	@Type(() => Number)
+	@IsNumber()
+	storeId?: number;
+
 	@ApiProperty({ example: 'Europe/London', required: false })
 	@IsOptional()
 	@IsString()

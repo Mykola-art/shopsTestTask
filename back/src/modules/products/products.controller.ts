@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
-import { CreateProductDto, UpdateProductDto, FindProductsQueryDto } from './dtos';
+import {CreateProductDto, UpdateProductDto, FindProductsQueryDto, GetActiveProductsQueryDto} from './dtos';
 import { ProductEntity } from '../../entities';
 import {AuthGuard, StoreOwnerGuard} from '../../guards';
 import { PaginationResponseDto } from '../../common/dtos';
@@ -41,6 +41,19 @@ export class ProductsController {
 	@ApiQuery({ type: FindProductsQueryDto })
 	findAll(@Query() query: FindProductsQueryDto): Promise<PaginationResponseDto<ProductEntity>> {
 		return this.productsService.findAll(query);
+	}
+
+	@Get('active')
+	@ApiOperation({ summary: 'Get active products for a store at a specific time' })
+	@ApiResponse({
+		status: 200,
+		description: 'Returns paginated list of active products',
+		type: PaginationResponseDto<ProductEntity>,
+	})
+	async getActiveProducts(
+		@Query() query: GetActiveProductsQueryDto,
+	): Promise<PaginationResponseDto<ProductEntity>> {
+		return this.productsService.getActiveProducts(query);
 	}
 
 	@Get(':id')
