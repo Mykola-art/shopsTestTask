@@ -3,6 +3,8 @@ import * as bcrypt from 'bcrypt';
 import { UserRoleEnum } from '../common/enums';
 import { StoreEntity } from './store.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import {ProductEntity} from "./product.entity";
+import {OrderEntity} from "./order.entity";
 
 @Entity({ name: 'users' })
 export class UserEntity {
@@ -33,6 +35,10 @@ export class UserEntity {
 	@ApiProperty({ type: () => [StoreEntity], required: false })
 	@OneToMany(() => StoreEntity, store => store.admin)
 	stores: StoreEntity[];
+
+	@ApiProperty({ type: () => [OrderEntity] })
+	@OneToMany(() => OrderEntity, order => order.user)
+	orders: OrderEntity[];
 
 	@BeforeInsert()
 	async hashPassword(): Promise<void> {

@@ -4,6 +4,7 @@ import {Repository, SelectQueryBuilder} from 'typeorm';
 import { OrderEntity } from '../../entities';
 import { CreateOrderDto, UpdateOrderDto, FindOrdersQueryDto } from './dtos';
 import { PaginationResponseDto } from '../../common/dtos';
+import {ConvertTimeByTimezone} from "../../utils";
 
 @Injectable()
 export class OrdersService {
@@ -22,7 +23,7 @@ export class OrdersService {
 
 		let qb = this.orderRepository.createQueryBuilder('order');
 
-		qb = this.getOrderFilters(qb, query);
+		qb = await this.getOrderFilters(qb, query);
 
 		qb.skip((page - 1) * limit).take(limit);
 
@@ -66,7 +67,7 @@ export class OrdersService {
 			.createQueryBuilder('order')
 			.where('order.userId = :userId', { userId });
 
-		qb = this.getOrderFilters(qb, query);
+		qb = await this.getOrderFilters(qb, query);
 
 		qb.skip((page - 1) * limit).take(limit);
 
@@ -95,7 +96,7 @@ export class OrdersService {
 			.leftJoin('order.product', 'product')
 			.where('product.storeId = :storeId', { storeId });
 
-		qb = this.getOrderFilters(qb, query);
+		qb = await this.getOrderFilters(qb, query);
 
 		qb.skip((page - 1) * limit).take(limit);
 
@@ -112,7 +113,7 @@ export class OrdersService {
 		};
 	}
 
-	private getOrderFilters(qb: SelectQueryBuilder<OrderEntity> , query: FindOrdersQueryDto): SelectQueryBuilder<OrderEntity> {
+	private async getOrderFilters(qb: SelectQueryBuilder<OrderEntity> , query: FindOrdersQueryDto): Promise<SelectQueryBuilder<OrderEntity>> {
 		if (query.isAccepted !== undefined) {
 			qb.andWhere('order.isAccepted = :isAccepted', { isAccepted: query.isAccepted });
 		}
@@ -127,12 +128,24 @@ export class OrdersService {
 			});
 		}
 
-		if (query.scheduleFrom) {
-			qb.andWhere('order.scheduleAt >= :scheduleFrom', { scheduleFrom: query.scheduleFrom });
+		let scheduleFrom = query.scheduleFrom;
+		let scheduleTo = query.scheduleTo;
+
+		if ((query.scheduleFrom || query.scheduleTo) && query.timezone) {
+			const order = await qb.getOne()
+			if (query.scheduleFrom) {
+				scheduleFrom = ConvertTimeByTimezone(query.scheduleFrom.toISOString(), query.timezone, order?.timezone ?? 'UTC');
+			}
+			if (query.scheduleTo) {
+				scheduleTo = ConvertTimeByTimezone(query.scheduleTo.toISOString(), query.timezone, order?.timezone ?? 'UTC');
+			}
 		}
 
-		if (query.scheduleTo) {
-			qb.andWhere('order.scheduleAt <= :scheduleTo', { scheduleTo: query.scheduleTo });
+		if (scheduleFrom) {
+			qb.andWhere('order.scheduleAt >= :scheduleFrom', { scheduleFrom });
+		}
+		if (scheduleTo) {
+			qb.andWhere('order.scheduleAt <= :scheduleTo', { scheduleTo });
 		}
 
 		return qb

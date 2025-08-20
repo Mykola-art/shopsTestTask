@@ -1,18 +1,22 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 import { IsOptional, IsBoolean, IsEnum, IsString, IsDateString } from 'class-validator';
 import { OrderTypeEnum } from '../../../common/enums';
+import {Type} from "class-transformer";
 
 export class FindOrdersQueryDto {
 	@ApiPropertyOptional({ example: 1 })
+	@Type(() => Number)
 	@IsOptional()
 	page?: number = 1;
 
 	@ApiPropertyOptional({ example: 10 })
+	@Type(() => Number)
 	@IsOptional()
 	limit?: number = 10;
 
 	@ApiPropertyOptional({ example: true })
 	@IsOptional()
+	@Type(() => Boolean)
 	@IsBoolean()
 	isAccepted?: boolean;
 
@@ -35,4 +39,9 @@ export class FindOrdersQueryDto {
 	@IsOptional()
 	@IsString()
 	address?: string;
+
+	@ApiProperty({ example: 'Europe/London', required: false })
+	@IsOptional()
+	@IsString()
+	timezone?: string;
 }

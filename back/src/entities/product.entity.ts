@@ -1,7 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+	Entity,
+	PrimaryGeneratedColumn,
+	Column,
+	ManyToOne,
+	CreateDateColumn,
+	UpdateDateColumn,
+	OneToMany
+} from 'typeorm';
 import { StoreEntity } from './store.entity';
 import { AvailabilityHoursInterface, ModifierInterface } from '../common/interfaces';
 import { ApiProperty } from '@nestjs/swagger';
+import {OrderEntity} from "./order.entity";
 
 @Entity({ name: 'products' })
 export class ProductEntity {
@@ -50,6 +59,10 @@ export class ProductEntity {
 	@ApiProperty({ example: 3600 })
 	@Column({ default: 3600 })
 	cacheTTL: number;
+
+	@ApiProperty({ type: () => [OrderEntity] })
+	@OneToMany(() => OrderEntity, order => order.product)
+	orders: OrderEntity[];
 
 	@ApiProperty({ example: '2024-01-01T09:58:00Z' })
 	@CreateDateColumn({ type: 'timestamptz' })
