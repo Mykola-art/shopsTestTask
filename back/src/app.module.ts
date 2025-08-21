@@ -8,6 +8,8 @@ import {AuthModule} from "./modules/auth/auth.module";
 import { StoresModule } from './modules/stores/stores.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import {ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -20,11 +22,21 @@ import { OrdersModule } from './modules/orders/orders.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => typeormModuleOptions(config),
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60_000, 
+      limit: 10,
+    }]),
     UsersModule,
     AuthModule,
     StoresModule,
     ProductsModule,
     OrdersModule
-  ]
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

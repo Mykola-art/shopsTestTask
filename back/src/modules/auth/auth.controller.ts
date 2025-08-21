@@ -13,6 +13,7 @@ import {AuthGuard} from "../../guards";
 import {GetUser} from "../../decorators";
 import {UserEntity} from "../../entities";
 import {RefreshTokenDto} from "../../common/interfaces";
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -31,6 +32,7 @@ export class AuthController {
 	}
 
 	@Post('login')
+	@Throttle({ default: { limit: 3, ttl: 60_000 } })
 	@HttpCode(HttpStatus.OK)
 	@ApiOperation({ summary: 'Login user' })
 	@ApiResponse({

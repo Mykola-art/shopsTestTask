@@ -47,7 +47,7 @@ export class AuthService {
 	}
 
 	private async generateTokens(user: UserEntity): Promise<TokenResponseDto> {
-		const accessToken = this.generateToken({ id: user.id }, '15m');
+		const accessToken = this.generateToken({ id: user.id }, '1h');
 		const refreshToken = this.generateToken({ id: user.id }, '7d');
 		return {
 			accessToken,
@@ -56,7 +56,7 @@ export class AuthService {
 				userId: user.id,
 				email: user.email,
 				role: user.role,
-				isHaveStores: !!user.stores.length
+				isHaveStores: !!user?.stores?.length
 			}
 		};
 	}
