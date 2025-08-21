@@ -1,17 +1,22 @@
-import {Controller, Post, Get, Patch, Delete, Param, Body, UseGuards, Query} from '@nestjs/common';
-import {ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery} from '@nestjs/swagger';
+import {Controller, Post, Get, Patch, Delete, Param, Body, UseGuards, Query, ParseIntPipe} from '@nestjs/common';
+import {ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiHeader} from '@nestjs/swagger';
 import { StoresService } from './stores.service';
 import {CreateStoreDto, GetActiveStoresQueryDto, UpdateStoreDto} from './dtos';
 import {StoreEntity, UserEntity} from '../../entities';
 import {GetUser} from "../../decorators";
 import {AuthGuard, StoreOwnerGuard} from "../../guards";
-import {PaginationResponseDto} from "../../common/dtos";
+import {IdDto, PaginationResponseDto, ResponseStoreDashboardDto} from "../../common/dtos";
 import {FindStoresQueryDto} from "./dtos/find.stores.query.dto";
 
 @ApiTags('Stores')
 @ApiBearerAuth('access-token')
+@ApiHeader({
+	name: 'X-CSRF-Token',
+	description: 'CSRF token received from GET /auth/csrf-token',
+	required: true,
+})
 @UseGuards(AuthGuard)
-@Controller('stores')
+@Controller({path: 'stores', version: '1'})
 export class StoresController {
 	constructor(private readonly storesService: StoresService) {}
 
@@ -67,15 +72,29 @@ export class StoresController {
 	@UseGuards(StoreOwnerGuard)
 	@ApiOperation({ summary: 'Update store' })
 	@ApiResponse({ status: 200, type: StoreEntity })
-	update(@Param('id') id: number, @Body() dto: UpdateStoreDto): Promise<StoreEntity> {
-		return this.storesService.update(id, dto);
+	update(@Param('id') id: number, @Body() dto: UpdateStoreDto, @GetUser() user: UserEntity): Promise<StoreEntity> {
+		return this.storesService.update(id, dto, user.id);
 	}
 
 	@Delete(':id')
 	@UseGuards(StoreOwnerGuard)
 	@ApiOperation({ summary: 'Delete store' })
 	@ApiResponse({ status: 200, description: 'Store deleted' })
-	remove(@Param('id') id: number): Promise<void> {
-		return this.storesService.remove(id);
+	remove(@Param('id') id: number, @GetUser() user: UserEntity): Promise<void> {
+		return this.storesService.remove(id, user.id);
+	}
+
+	@Get(':id/stats')
+	@UseGuards(StoreOwnerGuard)
+	@ApiOperation({ summary: 'Get statistics for a specific store' })
+	@ApiResponse({
+		status: 200,
+		description: 'Returns store statistics including product count and order stats',
+		type: ResponseStoreDashboardDto,
+	})
+	async getStoreStats(
+		@Param('id', ParseIntPipe) storeId: number,
+	): Promise<ResponseStoreDashboardDto> {
+		return this.storesService.getStoreStats(storeId);
 	}
 }

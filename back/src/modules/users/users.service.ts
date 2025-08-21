@@ -48,4 +48,9 @@ export class UsersService {
 		user.refreshToken = null;
 		await this.usersRepository.save(user);
 	}
+	
+	
+	async saveUser(user: UserEntity): Promise<UserEntity>{
+		return this.usersRepository.save(user)
+	}
 }

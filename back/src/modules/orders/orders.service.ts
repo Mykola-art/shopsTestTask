@@ -5,17 +5,22 @@ import { OrderEntity } from '../../entities';
 import { CreateOrderDto, UpdateOrderDto, FindOrdersQueryDto } from './dtos';
 import { PaginationResponseDto } from '../../common/dtos';
 import {ConvertTimeByTimezone} from "../../utils";
+import { AuditService } from '../audit/audit.service';
+import { AuditEventType } from 'src/common/enums/audit.event.type.enum';
 
 @Injectable()
 export class OrdersService {
 	constructor(
 		@InjectRepository(OrderEntity)
 		private readonly orderRepository: Repository<OrderEntity>,
+		private readonly auditService: AuditService
 	) {}
 
 	async create(dto: CreateOrderDto): Promise<OrderEntity> {
 		const order = this.orderRepository.create(dto);
-		return this.orderRepository.save(order);
+		const savedOrder = await this.orderRepository.save(order);
+		await this.auditService.log(AuditEventType.CREATE_ORDER, savedOrder.userId);
+		return savedOrder
 	}
 
 	async findAll(query: FindOrdersQueryDto): Promise<PaginationResponseDto<OrderEntity>> {
@@ -46,14 +51,16 @@ export class OrdersService {
 		return order;
 	}
 
-	async update(id: number, dto: UpdateOrderDto): Promise<OrderEntity> {
+	async update(id: number, dto: UpdateOrderDto, userId: number): Promise<OrderEntity> {
 		await this.findOne(id);
 		await this.orderRepository.update(id, dto);
+		await this.auditService.log(AuditEventType.UPDATE_ORDER, userId);
 		return this.findOne(id);
 	}
 
-	async remove(id: number): Promise<void> {
+	async remove(id: number, userId: number): Promise<void> {
 		await this.findOne(id);
+		await this.auditService.log(AuditEventType.DELETE_ORDER, userId);
 		await this.orderRepository.delete(id);
 	}
 
@@ -149,5 +156,12 @@ export class OrdersService {
 		}
 
 		return qb
+	}
+	
+	async getOrdersByStore(storeId: number):Promise<OrderEntity[]>{
+		const orders = await this.orderRepository.find({
+			where: { product: { store: { id: storeId } } },
+		});
+		return orders
 	}
 }

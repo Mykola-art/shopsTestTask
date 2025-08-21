@@ -32,6 +32,12 @@ export class UserEntity {
 	@Column({ type: 'text', nullable: true })
 	refreshToken?: string | null;
 
+	@Column({ default: 0 })
+	failedLoginAttempts: number;
+
+	@Column({ type: 'timestamptz', nullable: true })
+	lockoutUntil?: Date | null;
+
 	@ApiProperty({ type: () => [StoreEntity], required: false })
 	@OneToMany(() => StoreEntity, store => store.admin)
 	stores: StoreEntity[];

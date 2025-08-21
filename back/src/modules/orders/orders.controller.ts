@@ -15,6 +15,7 @@ import {
 	ApiOperation,
 	ApiResponse,
 	ApiQuery,
+    ApiHeader,
 } from '@nestjs/swagger';
 import {OrdersService} from './orders.service';
 import {
@@ -29,8 +30,13 @@ import {AdminGuard, AuthGuard, OrderOwnerGuard} from '../../guards';
 
 @ApiTags('Orders')
 @ApiBearerAuth('access-token')
+@ApiHeader({
+	name: 'X-CSRF-Token',
+	description: 'CSRF token received from GET /auth/csrf-token',
+	required: true,
+})
 @UseGuards(AuthGuard)
-@Controller('orders')
+@Controller({path: 'orders', version: '1'})
 export class OrdersController {
 	constructor(private readonly ordersService: OrdersService) {
 	}
@@ -81,15 +87,15 @@ export class OrdersController {
 	@UseGuards(OrderOwnerGuard)
 	@ApiOperation({summary: 'Update order'})
 	@ApiResponse({status: 200, type: OrderEntity})
-	update(@Param('id') id: number, @Body() dto: UpdateOrderDto): Promise<OrderEntity> {
-		return this.ordersService.update(id, dto);
+	update(@Param('id') id: number, @Body() dto: UpdateOrderDto, @GetUser() user: UserEntity): Promise<OrderEntity> {
+		return this.ordersService.update(id, dto, user.id);
 	}
 
 	@Delete(':id')
 	@UseGuards(OrderOwnerGuard)
 	@ApiOperation({summary: 'Delete order'})
 	@ApiResponse({status: 200, description: 'Order deleted'})
-	remove(@Param('id') id: number): Promise<void> {
-		return this.ordersService.remove(id);
+	remove(@Param('id') id: number, @GetUser() user: UserEntity): Promise<void> {
+		return this.ordersService.remove(id, user.id);
 	}
 }

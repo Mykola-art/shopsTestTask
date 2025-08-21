@@ -6,16 +6,20 @@ import { ProductEntity } from '../../entities';
 import {CreateProductDto, UpdateProductDto, FindProductsQueryDto, GetActiveProductsQueryDto} from './dtos';
 import { PaginationResponseDto } from '../../common/dtos';
 import {ConvertTimeByTimezone} from "../../utils";
+import { AuditService } from '../audit/audit.service';
+import { AuditEventType } from 'src/common/enums/audit.event.type.enum';
 
 @Injectable()
 export class ProductsService {
 	constructor(
 		@InjectRepository(ProductEntity)
 		private readonly productRepository: Repository<ProductEntity>,
+		private readonly auditService: AuditService
 	) {}
 
-	async create(dto: CreateProductDto): Promise<ProductEntity> {
+	async create(dto: CreateProductDto, userId: number): Promise<ProductEntity> {
 		const product = this.productRepository.create(dto);
+		await this.auditService.log(AuditEventType.CREATE_PRODUCT, userId);
 		return this.productRepository.save(product);
 	}
 
@@ -131,12 +135,21 @@ export class ProductsService {
 		return product;
 	}
 
-	async update(id: number, dto: UpdateProductDto): Promise<ProductEntity> {
+	async update(id: number, dto: UpdateProductDto, userId: number): Promise<ProductEntity> {
 		await this.productRepository.update(id, dto);
+		await this.auditService.log(AuditEventType.UPDATE_PRODUCT, userId);
 		return this.findOne(id);
 	}
 
-	async remove(id: number): Promise<void> {
+	async remove(id: number, userId: number): Promise<void> {
+		await this.auditService.log(AuditEventType.DELETE_PRODUCT, userId);
 		await this.productRepository.delete(id);
+	}
+
+	async getCountByStore(storeId: number):Promise<number>{
+		const productsCount = await this.productRepository.count({
+			where: { store: { id: storeId } },
+		});
+		return productsCount
 	}
 }

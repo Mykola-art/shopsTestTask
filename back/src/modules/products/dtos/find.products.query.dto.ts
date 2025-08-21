@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, IsNumber } from 'class-validator';
 import {Type} from "class-transformer";
+import { IsValidTimezone } from 'src/common/validators';
 
 export class FindProductsQueryDto {
 	@ApiProperty({ example: 1, required: false })
@@ -23,6 +24,7 @@ export class FindProductsQueryDto {
 
 	@ApiProperty({ example: 'Europe/London', required: false })
 	@IsOptional()
+	@IsValidTimezone({ message: 'Timezone must be a valid IANA timezone string' })
 	@IsString()
 	timezone?: string;
 

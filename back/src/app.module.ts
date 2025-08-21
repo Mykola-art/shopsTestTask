@@ -10,12 +10,13 @@ import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import {ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { AuditModule } from './modules/audit/audit.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env'],
+      envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
       validationSchema: envValidationSchema,
     }),
     TypeOrmModule.forRootAsync({
@@ -30,7 +31,8 @@ import { APP_GUARD } from '@nestjs/core';
     AuthModule,
     StoresModule,
     ProductsModule,
-    OrdersModule
+    OrdersModule,
+    AuditModule
   ],
   providers: [
     {

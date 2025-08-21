@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsDateString } from 'class-validator';
+import { IsValidTimezone } from 'src/common/validators';
 import { OrderTypeEnum } from '../../../common/enums';
 import { ModifierInterface } from '../../../common/interfaces';
 
@@ -27,6 +28,7 @@ export class CreateOrderDto {
 
 	@ApiProperty({ example: 'Europe/London' })
 	@IsNotEmpty()
+	@IsValidTimezone({ message: 'Timezone must be a valid IANA timezone string' })
 	@IsString()
 	timezone: string;
 

@@ -9,17 +9,23 @@ import {
 	Query,
 	UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiHeader } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import {CreateProductDto, UpdateProductDto, FindProductsQueryDto, GetActiveProductsQueryDto} from './dtos';
-import { ProductEntity } from '../../entities';
+import { ProductEntity, UserEntity } from '../../entities';
 import {AuthGuard, StoreOwnerGuard} from '../../guards';
 import { PaginationResponseDto } from '../../common/dtos';
+import { GetUser } from 'src/decorators';
 
 @ApiTags('Products')
 @ApiBearerAuth('access-token')
+@ApiHeader({
+	name: 'X-CSRF-Token',
+	description: 'CSRF token received from GET /auth/csrf-token',
+	required: true,
+})
 @UseGuards(AuthGuard)
-@Controller('products')
+@Controller({path: 'products', version: '1'})
 export class ProductsController {
 	constructor(private readonly productsService: ProductsService) {}
 
@@ -27,8 +33,8 @@ export class ProductsController {
 	@UseGuards(StoreOwnerGuard)
 	@ApiOperation({ summary: 'Create a new product' })
 	@ApiResponse({ status: 201, description: 'Product successfully created', type: ProductEntity })
-	create(@Body() dto: CreateProductDto): Promise<ProductEntity> {
-		return this.productsService.create(dto);
+	create(@Body() dto: CreateProductDto, @GetUser() user: UserEntity): Promise<ProductEntity> {
+		return this.productsService.create(dto, user.id);
 	}
 
 	@Get()
@@ -67,15 +73,15 @@ export class ProductsController {
 	@UseGuards(StoreOwnerGuard)
 	@ApiOperation({ summary: 'Update product' })
 	@ApiResponse({ status: 200, type: ProductEntity })
-	update(@Param('id') id: number, @Body() dto: UpdateProductDto): Promise<ProductEntity> {
-		return this.productsService.update(id, dto)
+	update(@Param('id') id: number, @Body() dto: UpdateProductDto, @GetUser() user: UserEntity): Promise<ProductEntity> {
+		return this.productsService.update(id, dto, user.id)
 	}
 
 	@Delete(':id')
 	@UseGuards(StoreOwnerGuard)
 	@ApiOperation({ summary: 'Delete product' })
 	@ApiResponse({ status: 200, description: 'Product deleted' })
-	remove(@Param('id') id: number): Promise<void> {
-		return this.productsService.remove(id);
+	remove(@Param('id') id: number, @GetUser() user: UserEntity): Promise<void> {
+		return this.productsService.remove(id, user.id);
 	}
 }

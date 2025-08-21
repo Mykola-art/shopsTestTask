@@ -1,9 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import {Type} from "class-transformer";
+import { IsValidTimezone } from 'src/common/validators';
 
 export class GetActiveStoresQueryDto {
 	@ApiProperty({ example: 'Europe/London', description: 'Часова зона для переведення часу' })
+	@IsValidTimezone({ message: 'Timezone must be a valid IANA timezone string' })
 	@IsString()
 	timezone: string;
 

@@ -1,3 +1,5 @@
+### I love per diem
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
@@ -33,6 +35,18 @@ $ npm install
 
 ## Compile and run the project
 
+## Create you .env.{production/development} file
+
+PORT=3000
+
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=shop_test_task
+DB_USER=postgres
+DB_PASSWORD=password
+
+JWT_SECRET=secret
+
 ```bash
 # development
 $ npm run start
@@ -43,6 +57,22 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+
+### Run using docker
+```agsl
+docker-compose up --build
+```
+
+## Open API
+
+### development
+http://localhost:{PORT}/api
+
+### production
+https://localhost:{PORT}/api
+
+### Open Documentation (Swagger)
+http://localhost:{PORT}/api/docs
 
 ## Run tests
 
