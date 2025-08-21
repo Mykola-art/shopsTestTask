@@ -1,12 +1,18 @@
+'use client';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import styles from './LoginForm.module.scss';
 import { AuthFormData } from '@/lib/types';
+import { loginUser } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+import { useState } from 'react';
 
 const loginSchema = z.object({
-    email: z.string().email('Invalid email format'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
+    email: z.string().email({ message: 'Invalid email format' }),
+    password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
 });
 
 export default function LoginForm() {
@@ -14,12 +20,30 @@ export default function LoginForm() {
         register,
         handleSubmit,
         formState: { errors },
+        setError,
     } = useForm<AuthFormData>({
         resolver: zodResolver(loginSchema),
     });
+    const { setAuth } = useAuth();
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
 
-    const onSubmit = (data: AuthFormData) => {
-        console.log('Login data:', data);
+    const onSubmit = async (data: AuthFormData) => {
+        setIsLoading(true);
+        try {
+            const response = await loginUser(data);
+            setAuth(response);
+            router.push('/');
+            router.refresh();
+        } catch (error: any) {
+            if (error.message.includes('Too many requests')) {
+                setError('root', { message: 'Too many login attempts. Please try again later.' });
+            } else {
+                setError('root', { message: error.message || 'Login failed' });
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -52,14 +76,18 @@ export default function LoginForm() {
                         className={styles.input}
                         placeholder="Enter your password"
                     />
-                    {errors.password && (
-                        <p className={styles.error}>{errors.password.message}</p>
-                    )}
+                    {errors.password && <p className={styles.error}>{errors.password.message}</p>}
                 </div>
 
-                <button type="submit" className={styles.button}>
-                    Sign In
+                {errors.root && <p className={styles.error}>{errors.root.message}</p>}
+
+                <button type="submit" className={styles.button} disabled={isLoading}>
+                    {isLoading ? 'Signing In...' : 'Sign In'}
                 </button>
+
+                <Link href="/register" className={styles.link}>
+                    Don&apos;t have an account?
+                </Link>
             </form>
         </div>
     );
