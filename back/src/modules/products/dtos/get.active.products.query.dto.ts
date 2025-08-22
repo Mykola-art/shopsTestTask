@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import {Type} from "class-transformer";
-import { IsValidTimezone } from 'src/common/validators';
+import { IsValidTimezone } from '../../../common/validators';
 
 export class GetActiveProductsQueryDto {
 	@ApiProperty({ example: 1, description: 'ID магазину' })

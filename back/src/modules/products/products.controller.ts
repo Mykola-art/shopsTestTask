@@ -15,7 +15,7 @@ import {CreateProductDto, UpdateProductDto, FindProductsQueryDto, GetActiveProdu
 import { ProductEntity, UserEntity } from '../../entities';
 import {AuthGuard, StoreOwnerGuard} from '../../guards';
 import { PaginationResponseDto } from '../../common/dtos';
-import { GetUser } from 'src/decorators';
+import { GetUser } from '../../../src/decorators';
 
 @ApiTags('Products')
 @ApiBearerAuth('access-token')

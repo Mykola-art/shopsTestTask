@@ -1,7 +1,7 @@
 import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 import { IsOptional, IsString, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsValidTimezone } from 'src/common/validators';
+import { IsValidTimezone } from '../../../common/validators';
 
 export class FindStoresQueryDto {
 	@ApiPropertyOptional({ example: 1 })

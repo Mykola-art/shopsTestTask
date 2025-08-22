@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsDateString } from 'class-validator';
-import { IsValidTimezone } from 'src/common/validators';
+import { IsValidTimezone } from '../../../common/validators';
 import { OrderTypeEnum } from '../../../common/enums';
 import { ModifierInterface } from '../../../common/interfaces';
 

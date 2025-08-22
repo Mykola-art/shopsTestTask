@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsNumber, IsObject, IsOptional } from 'class-validator';
-import { IsValidTimezone } from 'src/common/validators';
+import { IsValidTimezone } from '../../../common/validators';
 import { AvailabilityHoursInterface } from '../../../common/interfaces';
 
 export class CreateStoreDto {

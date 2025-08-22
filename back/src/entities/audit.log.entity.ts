@@ -1,4 +1,4 @@
-import { AuditEventType } from 'src/common/enums/audit.event.type.enum';
+import { AuditEventType } from '../common/enums/audit.event.type.enum';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity({ name: 'audit_logs' })

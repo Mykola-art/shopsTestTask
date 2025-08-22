@@ -8,7 +8,7 @@ import { PaginationResponseDto, ResponseStoreDashboardDto } from "../../common/d
 import { FindStoresQueryDto } from "./dtos/find.stores.query.dto";
 import { ConvertTimeByTimezone } from "../../utils";
 import { AuditService } from '../audit/audit.service';
-import { AuditEventType } from 'src/common/enums/audit.event.type.enum';
+import { AuditEventType } from '../../common/enums/audit.event.type.enum';
 import { ProductsService } from '../products/products.service';
 import { OrdersService } from '../orders/orders.service';
 
@@ -126,13 +126,13 @@ export class StoresService {
 	async update(id: number, dto: UpdateStoreDto, userId: number): Promise<StoreEntity> {
 		const store = await this.findOne(id);
 		const updated = Object.assign(store, dto);
-		await this.auditService.log(AuditEventType.CREATE_STORE, userId);
+		await this.auditService.log(AuditEventType.UPDATE_STORE, userId);
 		return this.storeRepository.save(updated);
 	}
 
 	async remove(id: number, userId: number): Promise<void> {
 		await this.findOne(id);
-		await this.auditService.log(AuditEventType.CREATE_STORE, userId);
+		await this.auditService.log(AuditEventType.DELETE_STORE, userId);
 		await this.storeRepository.delete(id);
 	}
 

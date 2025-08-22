@@ -94,6 +94,17 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "src/main.ts",
+      "src/app.module.ts",
+      "src/modules/users/users.module.ts",
+      "src/modules/auth/auth.module.ts",
+      "src/modules/audit/audit.module.ts",
+      "src/modules/orders/orders.module.ts",
+      "src/modules/products/products.module.ts",
+      "src/modules/stores/stores.module.ts"
+    ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }

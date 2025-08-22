@@ -5,9 +5,9 @@ import { UserDto } from "../users/dtos";
 import { TokenPayloadDto, TokenResponseDto } from "../../common/dtos";
 import { JwtService } from "@nestjs/jwt";
 import { UserEntity } from "../../entities";
-import { AuditEventType } from 'src/common/enums/audit.event.type.enum';
+import { AuditEventType } from '../../common/enums/audit.event.type.enum';
 import { AuditService } from '../audit/audit.service';
-import {LOCKOUT_DURATION_MINUTES, MAX_FAILED_ATTEMPTS } from 'src/common/constants/login.constants';
+import {LOCKOUT_DURATION_MINUTES, MAX_FAILED_ATTEMPTS } from '../../../src/common/constants/login.constants';
 
 @Injectable()
 export class AuthService {

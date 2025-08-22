@@ -7,7 +7,7 @@ import {CreateProductDto, UpdateProductDto, FindProductsQueryDto, GetActiveProdu
 import { PaginationResponseDto } from '../../common/dtos';
 import {ConvertTimeByTimezone} from "../../utils";
 import { AuditService } from '../audit/audit.service';
-import { AuditEventType } from 'src/common/enums/audit.event.type.enum';
+import { AuditEventType } from '../../common/enums/audit.event.type.enum';
 
 @Injectable()
 export class ProductsService {

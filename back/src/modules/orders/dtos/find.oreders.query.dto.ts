@@ -2,7 +2,7 @@ import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 import { IsOptional, IsBoolean, IsEnum, IsString, IsDateString } from 'class-validator';
 import { OrderTypeEnum } from '../../../common/enums';
 import {Type} from "class-transformer";
-import { IsValidTimezone } from 'src/common/validators';
+import { IsValidTimezone } from '../../../common/validators';
 
 export class FindOrdersQueryDto {
 	@ApiPropertyOptional({ example: 1 })
