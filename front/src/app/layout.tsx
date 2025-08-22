@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import '../styles/global.scss';
 import {AuthProvider} from "@/context/AuthContext";
 import Header from "@/components/Header";
+import {ToastContainer} from "react-toastify";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,6 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
+            <ToastContainer position='top-center'/>
             <Header/>
             {children}
         </AuthProvider>

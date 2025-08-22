@@ -10,19 +10,28 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
+    "@vvo/tzdb": "^6.183.0",
     "axios": "^1.11.0",
+    "lucide-react": "^0.540.0",
+    "luxon": "^3.7.1",
     "next": "15.4.7",
+    "qs": "^6.14.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
+    "react-toastify": "^11.0.5",
+    "sanitize-html": "^2.17.0",
     "sass": "^1.90.0",
     "zod": "^4.0.17"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/luxon": "^3.7.1",
     "@types/node": "^20",
+    "@types/qs": "^6.14.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.7",
     "typescript": "^5"

@@ -1,5 +1,13 @@
 import axios, { AxiosError } from 'axios';
-import {AuthFormData, AuthResponse} from './types';
+import {
+    AuthFormData,
+    AuthResponse,
+    CreateStoreData,
+    Store,
+    StoresFilter,
+    StoresResponse,
+    UpdateStoreData
+} from './types';
 import {getCookie} from "@/utils/getCookie";
 
 const api = axios.create({
@@ -10,7 +18,14 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-    if (config.url?.includes('/api/auth/logout') || config.url?.includes('/api/auth/refresh')) {
+    const protectedEndpoints = [
+        '/api/auth/logout',
+        '/api/auth/refresh',
+        '/api/stores',
+        '/api/stores/my',
+        '/api/stores/',
+    ];
+    if (protectedEndpoints.some((endpoint) => config.url?.includes(endpoint))) {
         const accessToken = getCookie('accessToken');
         if (accessToken) {
             config.headers['Authorization'] = `Bearer ${accessToken}`;
@@ -51,6 +66,35 @@ export const refreshToken = async (refreshToken: string, userId: number): Promis
 
 export const logoutUser = async () => {
     await api.post('/api/auth/logout');
+};
+
+export const createStore = async (data: CreateStoreData): Promise<Store> => {
+    const response = await api.post<Store>('/api/stores', data);
+    return response.data;
+};
+
+export const getStores = async (filters: StoresFilter = {}): Promise<StoresResponse> => {
+    const response = await api.get<StoresResponse>('/api/stores', { params: filters });
+    return response.data;
+};
+
+export const getUserStores = async (): Promise<Store[]> => {
+    const response = await api.get<Store[]>('/api/stores/my');
+    return response.data;
+};
+
+export const getStoreById = async (id: number): Promise<Store> => {
+    const response = await api.get<Store>(`/api/stores/${id}`);
+    return response.data;
+};
+
+export const updateStore = async (id: number, data: UpdateStoreData): Promise<Store> => {
+    const response = await api.patch<Store>(`/api/stores/${id}`, data);
+    return response.data;
+};
+
+export const deleteStore = async (id: number): Promise<void> => {
+    await api.delete(`/api/stores/${id}`);
 };
 
 export default api;
