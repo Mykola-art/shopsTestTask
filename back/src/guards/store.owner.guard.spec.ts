@@ -1,4 +1,8 @@
-import { ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { StoreOwnerGuard } from './store.owner.guard';
 import { StoresService } from '../modules/stores/stores.service';
 import { UserRoleEnum } from '../common/enums';
@@ -10,15 +14,20 @@ describe('StoreOwnerGuard', () => {
   const mockUser = { id: 1, role: UserRoleEnum.USER } as any;
   const mockStore = { id: 10, admin: { id: mockUser.id } };
 
-  const createMockExecutionContext = (user: any, params: any = {}, body: any = {}) => ({
-    switchToHttp: () => ({
-      getRequest: () => ({
-        user,
-        params,
-        body,
+  const createMockExecutionContext = (
+    user: any,
+    params: any = {},
+    body: any = {},
+  ) =>
+    ({
+      switchToHttp: () => ({
+        getRequest: () => ({
+          user,
+          params,
+          body,
+        }),
       }),
-    }),
-  } as unknown as ExecutionContext);
+    }) as unknown as ExecutionContext;
 
   beforeEach(() => {
     storesService = { findOne: jest.fn() } as any;
@@ -26,7 +35,10 @@ describe('StoreOwnerGuard', () => {
   });
 
   it('should allow admin users', async () => {
-    const context = createMockExecutionContext({ ...mockUser, role: UserRoleEnum.ADMIN });
+    const context = createMockExecutionContext({
+      ...mockUser,
+      role: UserRoleEnum.ADMIN,
+    });
     await expect(guard.canActivate(context)).resolves.toBe(true);
   });
 
@@ -39,9 +51,14 @@ describe('StoreOwnerGuard', () => {
 
   it('should throw ForbiddenException if user is not store admin', async () => {
     const context = createMockExecutionContext(mockUser, { id: '10' });
-    (storesService.findOne as jest.Mock).mockResolvedValue({ id: 10, admin: { id: 99 } });
+    (storesService.findOne as jest.Mock).mockResolvedValue({
+      id: 10,
+      admin: { id: 99 },
+    });
 
-    await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      ForbiddenException,
+    );
   });
 
   it('should allow store admin user', async () => {

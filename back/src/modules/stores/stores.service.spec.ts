@@ -2,7 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StoresService } from './stores.service';
-import { StoreEntity, UserEntity, ProductEntity, OrderEntity, AuditLogEntity } from '../../entities';
+import {
+  StoreEntity,
+  UserEntity,
+  ProductEntity,
+  OrderEntity,
+  AuditLogEntity,
+} from '../../entities';
 import { AuditService } from '../audit/audit.service';
 import { ProductsService } from '../products/products.service';
 import { OrdersService } from '../orders/orders.service';
@@ -86,7 +92,9 @@ describe('StoresService', () => {
       .compile();
 
     service = module.get<StoresService>(StoresService);
-    storeRepo = module.get<Repository<StoreEntity>>(getRepositoryToken(StoreEntity));
+    storeRepo = module.get<Repository<StoreEntity>>(
+      getRepositoryToken(StoreEntity),
+    );
     auditService = module.get<AuditService>(AuditService);
     productService = module.get<ProductsService>(ProductsService);
     orderService = module.get<OrdersService>(OrdersService);
@@ -113,7 +121,10 @@ describe('StoresService', () => {
       } as any);
 
       expect(result).toEqual(mockStore);
-      expect(auditService.log).toHaveBeenCalledWith('CREATE_STORE', mockUser.id);
+      expect(auditService.log).toHaveBeenCalledWith(
+        'CREATE_STORE',
+        mockUser.id,
+      );
     });
   });
 
@@ -162,26 +173,40 @@ describe('StoresService', () => {
 
     it('should throw NotFoundException if store not found', async () => {
       jest.spyOn(storeRepo, 'findOne').mockResolvedValue(null);
-      await expect(service.getStoreStats(999)).rejects.toThrow(NotFoundException);
+      await expect(service.getStoreStats(999)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('update', () => {
     it('should update store and log audit', async () => {
-      const updatedStore = { ...mockStore, name: 'Updated Name' } as StoreEntity;
+      const updatedStore = {
+        ...mockStore,
+        name: 'Updated Name',
+      } as StoreEntity;
 
       jest.spyOn(service, 'findOne').mockResolvedValue(mockStore);
       jest.spyOn(storeRepo, 'save').mockResolvedValue(updatedStore);
 
-      const result = await service.update(mockStore.id, { name: 'Updated Name' } as any, mockUser.id);
+      const result = await service.update(
+        mockStore.id,
+        { name: 'Updated Name' } as any,
+        mockUser.id,
+      );
 
       expect(result.name).toBe('Updated Name');
-      expect(auditService.log).toHaveBeenCalledWith('UPDATE_STORE', mockUser.id);
+      expect(auditService.log).toHaveBeenCalledWith(
+        'UPDATE_STORE',
+        mockUser.id,
+      );
     });
 
     it('should throw NotFoundException if store not found', async () => {
       jest.spyOn(service, 'findOne').mockRejectedValue(new NotFoundException());
-      await expect(service.update(999, { name: 'X' } as any, mockUser.id)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update(999, { name: 'X' } as any, mockUser.id),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -191,12 +216,17 @@ describe('StoresService', () => {
       jest.spyOn(storeRepo, 'delete').mockResolvedValue({} as any);
 
       await service.remove(mockStore.id, mockUser.id);
-      expect(auditService.log).toHaveBeenCalledWith('DELETE_STORE', mockUser.id);
+      expect(auditService.log).toHaveBeenCalledWith(
+        'DELETE_STORE',
+        mockUser.id,
+      );
     });
 
     it('should throw NotFoundException if store not found', async () => {
       jest.spyOn(service, 'findOne').mockRejectedValue(new NotFoundException());
-      await expect(service.remove(999, mockUser.id)).rejects.toThrow(NotFoundException);
+      await expect(service.remove(999, mockUser.id)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

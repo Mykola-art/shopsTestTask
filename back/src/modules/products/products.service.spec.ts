@@ -83,9 +83,15 @@ describe('ProductsService', () => {
       jest.spyOn(repo, 'create').mockReturnValue(mockProduct);
       jest.spyOn(repo, 'save').mockResolvedValue(mockProduct);
 
-      const result = await service.create({ name: 'Pizza', price: 10, storeId: 1, availability: {} } as any, 1);
+      const result = await service.create(
+        { name: 'Pizza', price: 10, storeId: 1, availability: {} } as any,
+        1,
+      );
       expect(result).toEqual(mockProduct);
-      expect(auditService.log).toHaveBeenCalledWith(AuditEventType.CREATE_PRODUCT, 1);
+      expect(auditService.log).toHaveBeenCalledWith(
+        AuditEventType.CREATE_PRODUCT,
+        1,
+      );
     });
   });
 
@@ -114,7 +120,13 @@ describe('ProductsService', () => {
   describe('getActiveProducts', () => {
     it('should return active products', async () => {
       jest.spyOn(repo, 'createQueryBuilder').mockReturnValue(mockQueryBuilder);
-      const result = await service.getActiveProducts({ storeId: 1, timezone: 'Europe/Kyiv', time: '10:00', page: 1, limit: 10 } as any);
+      const result = await service.getActiveProducts({
+        storeId: 1,
+        timezone: 'Europe/Kyiv',
+        time: '10:00',
+        page: 1,
+        limit: 10,
+      } as any);
       expect(result.items).toEqual([mockProduct]);
       expect(ConvertTimeByTimezone).toHaveBeenCalled();
     });
@@ -128,7 +140,12 @@ describe('ProductsService', () => {
     });
 
     it('should throw NotFoundException if not found', async () => {
-      jest.spyOn(repo, 'createQueryBuilder').mockReturnValue({ ...mockQueryBuilder, getOne: jest.fn().mockResolvedValue(undefined) });
+      jest
+        .spyOn(repo, 'createQueryBuilder')
+        .mockReturnValue({
+          ...mockQueryBuilder,
+          getOne: jest.fn().mockResolvedValue(undefined),
+        });
       await expect(service.findOne(999)).rejects.toThrow(NotFoundException);
     });
   });
@@ -139,7 +156,10 @@ describe('ProductsService', () => {
       jest.spyOn(service, 'findOne').mockResolvedValue(mockProduct);
       const result = await service.update(1, { name: 'Updated' } as any, 1);
       expect(result).toEqual(mockProduct);
-      expect(auditService.log).toHaveBeenCalledWith(AuditEventType.UPDATE_PRODUCT, 1);
+      expect(auditService.log).toHaveBeenCalledWith(
+        AuditEventType.UPDATE_PRODUCT,
+        1,
+      );
     });
   });
 
@@ -147,7 +167,10 @@ describe('ProductsService', () => {
     it('should remove product and log audit', async () => {
       jest.spyOn(repo, 'delete').mockResolvedValue({} as any);
       await service.remove(1, 1);
-      expect(auditService.log).toHaveBeenCalledWith(AuditEventType.DELETE_PRODUCT, 1);
+      expect(auditService.log).toHaveBeenCalledWith(
+        AuditEventType.DELETE_PRODUCT,
+        1,
+      );
     });
   });
 

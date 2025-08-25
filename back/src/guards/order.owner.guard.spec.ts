@@ -11,14 +11,15 @@ describe('OrderOwnerGuard', () => {
 
   const mockUser = { id: 1, role: UserRoleEnum.USER } as any;
 
-  const createMockExecutionContext = (user: any, params: any = {}) => ({
-    switchToHttp: () => ({
-      getRequest: () => ({
-        user,
-        params,
+  const createMockExecutionContext = (user: any, params: any = {}) =>
+    ({
+      switchToHttp: () => ({
+        getRequest: () => ({
+          user,
+          params,
+        }),
       }),
-    }),
-  } as unknown as ExecutionContext);
+    }) as unknown as ExecutionContext;
 
   beforeEach(() => {
     productsService = { findOne: jest.fn() } as any;
@@ -27,7 +28,10 @@ describe('OrderOwnerGuard', () => {
   });
 
   it('should allow admin users', async () => {
-    const context = createMockExecutionContext({ ...mockUser, role: UserRoleEnum.ADMIN });
+    const context = createMockExecutionContext({
+      ...mockUser,
+      role: UserRoleEnum.ADMIN,
+    });
     await expect(guard.canActivate(context)).resolves.toBe(true);
   });
 
@@ -40,22 +44,35 @@ describe('OrderOwnerGuard', () => {
     const context = createMockExecutionContext(mockUser, { id: '10' });
 
     // Return an object with undefined productId to avoid TypeError
-    (ordersService.findOne as jest.Mock).mockResolvedValue({ productId: undefined, userId: 2 });
+    (ordersService.findOne as jest.Mock).mockResolvedValue({
+      productId: undefined,
+      userId: 2,
+    });
 
-    await expect(guard.canActivate(context)).rejects.toThrow('Product not found');
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      'Product not found',
+    );
   });
 
   it('should throw NotFoundException if product not found', async () => {
     const context = createMockExecutionContext(mockUser, { id: '10' });
-    (ordersService.findOne as jest.Mock).mockResolvedValue({ productId: 99, userId: 2 });
+    (ordersService.findOne as jest.Mock).mockResolvedValue({
+      productId: 99,
+      userId: 2,
+    });
     (productsService.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(guard.canActivate(context)).rejects.toThrow('Product not found');
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      'Product not found',
+    );
   });
 
   it('should allow if user owns the order', async () => {
     const context = createMockExecutionContext(mockUser, { id: '10' });
-    (ordersService.findOne as jest.Mock).mockResolvedValue({ productId: 1, userId: mockUser.id });
+    (ordersService.findOne as jest.Mock).mockResolvedValue({
+      productId: 1,
+      userId: mockUser.id,
+    });
     (productsService.findOne as jest.Mock).mockResolvedValue({
       store: { admin: { id: 2 } },
     });
@@ -65,7 +82,10 @@ describe('OrderOwnerGuard', () => {
 
   it('should allow if user is store admin', async () => {
     const context = createMockExecutionContext(mockUser, { id: '10' });
-    (ordersService.findOne as jest.Mock).mockResolvedValue({ productId: 1, userId: 2 });
+    (ordersService.findOne as jest.Mock).mockResolvedValue({
+      productId: 1,
+      userId: 2,
+    });
     (productsService.findOne as jest.Mock).mockResolvedValue({
       store: { admin: { id: mockUser.id } },
     });
@@ -75,11 +95,16 @@ describe('OrderOwnerGuard', () => {
 
   it('should throw ForbiddenException if user is neither admin nor owner', async () => {
     const context = createMockExecutionContext(mockUser, { id: '10' });
-    (ordersService.findOne as jest.Mock).mockResolvedValue({ productId: 1, userId: 2 });
+    (ordersService.findOne as jest.Mock).mockResolvedValue({
+      productId: 1,
+      userId: 2,
+    });
     (productsService.findOne as jest.Mock).mockResolvedValue({
       store: { admin: { id: 99 } },
     });
 
-    await expect(guard.canActivate(context)).rejects.toThrow('You are not allowed to modify this product');
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      'You are not allowed to modify this product',
+    );
   });
 });

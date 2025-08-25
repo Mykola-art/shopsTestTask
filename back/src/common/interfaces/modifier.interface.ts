@@ -1,7 +1,7 @@
-export interface ModifierInterface{
-	name: string;
-	options: {
-		name: string;
-		priceDelta?: number;
-	}[]
+export interface ModifierInterface {
+  name: string;
+  options: {
+    name: string;
+    priceDelta?: number;
+  }[];
 }

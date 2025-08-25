@@ -1,2 +1,2 @@
-export {UserRoleEnum} from "./user.role.enum"
-export {OrderTypeEnum} from "./order.type.enum"
+export { UserRoleEnum } from './user.role.enum';
+export { OrderTypeEnum } from './order.type.enum';

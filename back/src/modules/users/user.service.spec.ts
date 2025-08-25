@@ -54,7 +54,10 @@ describe('UsersService', () => {
 
   describe('create', () => {
     it('should create and save a new user', async () => {
-      const dto: UserDto = { email: 'john@example.com', password: 'securePass123' };
+      const dto: UserDto = {
+        email: 'john@example.com',
+        password: 'securePass123',
+      };
       const result = await service.create(dto);
       expect(repository.create).toHaveBeenCalledWith(dto);
       expect(repository.save).toHaveBeenCalled();
@@ -75,7 +78,10 @@ describe('UsersService', () => {
     it('should return a user by email', async () => {
       (repository.findOne as jest.Mock).mockResolvedValue(mockUser);
       const result = await service.getByEmail('john@example.com');
-      expect(repository.findOne).toHaveBeenCalledWith({ where: { email: 'john@example.com' }, relations: ['stores'] });
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { email: 'john@example.com' },
+        relations: ['stores'],
+      });
       expect(result).toEqual(mockUser);
     });
   });
@@ -83,26 +89,38 @@ describe('UsersService', () => {
   describe('updateRefreshToken', () => {
     it('should hash and update refresh token', async () => {
       const token = 'refreshToken123';
-      jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('hashedToken'));
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockImplementation(() => Promise.resolve('hashedToken'));
       (repository.findOneById as jest.Mock).mockResolvedValue(mockUser);
 
       await service.updateRefreshToken(1, token);
 
       expect(bcrypt.hash).toHaveBeenCalledWith(token, 12);
-      expect(repository.save).toHaveBeenCalledWith({ ...mockUser, refreshToken: 'hashedToken' });
+      expect(repository.save).toHaveBeenCalledWith({
+        ...mockUser,
+        refreshToken: 'hashedToken',
+      });
     });
 
     it('should throw NotFoundException if user not found', async () => {
       (repository.findOneById as jest.Mock).mockResolvedValue(null);
-      await expect(service.updateRefreshToken(999, 'token')).rejects.toThrow(NotFoundException);
+      await expect(service.updateRefreshToken(999, 'token')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('validateRefreshToken', () => {
     it('should return true if token is valid', async () => {
       const token = 'refreshToken123';
-      (repository.findOneById as jest.Mock).mockResolvedValue({ ...mockUser, refreshToken: 'hashedToken' });
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      (repository.findOneById as jest.Mock).mockResolvedValue({
+        ...mockUser,
+        refreshToken: 'hashedToken',
+      });
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(true));
 
       const result = await service.validateRefreshToken(1, token);
       expect(result).toBe(true);
@@ -119,12 +137,17 @@ describe('UsersService', () => {
     it('should set refreshToken to null', async () => {
       (repository.findOneById as jest.Mock).mockResolvedValue(mockUser);
       await service.removeRefreshToken(1);
-      expect(repository.save).toHaveBeenCalledWith({ ...mockUser, refreshToken: null });
+      expect(repository.save).toHaveBeenCalledWith({
+        ...mockUser,
+        refreshToken: null,
+      });
     });
 
     it('should throw NotFoundException if user not found', async () => {
       (repository.findOneById as jest.Mock).mockResolvedValue(null);
-      await expect(service.removeRefreshToken(999)).rejects.toThrow(NotFoundException);
+      await expect(service.removeRefreshToken(999)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

@@ -2,8 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { StoresController } from './stores.controller';
 import { StoresService } from './stores.service';
 import { StoreEntity, UserEntity } from '../../entities';
-import { CreateStoreDto, UpdateStoreDto, GetActiveStoresQueryDto } from './dtos';
-import { PaginationResponseDto, ResponseStoreDashboardDto } from '../../common/dtos';
+import {
+  CreateStoreDto,
+  UpdateStoreDto,
+  GetActiveStoresQueryDto,
+} from './dtos';
+import {
+  PaginationResponseDto,
+  ResponseStoreDashboardDto,
+} from '../../common/dtos';
 import { AuthGuard, StoreOwnerGuard } from '../../guards';
 import { CanActivate } from '@nestjs/common';
 
@@ -25,9 +32,7 @@ describe('StoresController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [StoresController],
-      providers: [
-        { provide: StoresService, useValue: mockStoresService },
-      ],
+      providers: [{ provide: StoresService, useValue: mockStoresService }],
     })
       .overrideGuard(AuthGuard)
       .useValue({ canActivate: jest.fn(() => true) } as CanActivate)
@@ -84,7 +89,12 @@ describe('StoresController', () => {
   });
 
   it('should return active stores', async () => {
-    const query: GetActiveStoresQueryDto = { timezone: 'UTC', time: '12:00', page: 1, limit: 10 };
+    const query: GetActiveStoresQueryDto = {
+      timezone: 'UTC',
+      time: '12:00',
+      page: 1,
+      limit: 10,
+    };
     const result: PaginationResponseDto<StoreEntity> = {
       items: [],
       meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 },
@@ -97,7 +107,11 @@ describe('StoresController', () => {
   });
 
   it('should return store by id', async () => {
-    const store: StoreEntity = { id: 1, name: 'Test', address: '123' } as StoreEntity;
+    const store: StoreEntity = {
+      id: 1,
+      name: 'Test',
+      address: '123',
+    } as StoreEntity;
     mockStoresService.findOne.mockResolvedValue(store);
 
     expect(await controller.findOne(1)).toEqual(store);

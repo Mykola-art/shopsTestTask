@@ -1,7 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
-import { CreateProductDto, UpdateProductDto, FindProductsQueryDto, GetActiveProductsQueryDto } from './dtos';
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  FindProductsQueryDto,
+  GetActiveProductsQueryDto,
+} from './dtos';
 import { ProductEntity } from '../../entities';
 import { PaginationResponseDto } from '../../common/dtos';
 import { AuthGuard, StoreOwnerGuard } from '../../guards';
@@ -63,7 +68,10 @@ describe('ProductsController', () => {
   describe('findAll', () => {
     it('should return all products with pagination', async () => {
       const query: FindProductsQueryDto = { page: 1, limit: 10 };
-      const result: PaginationResponseDto<ProductEntity> = { items: [], meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 } };
+      const result: PaginationResponseDto<ProductEntity> = {
+        items: [],
+        meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 },
+      };
 
       mockProductsService.findAll.mockResolvedValue(result);
 
@@ -115,7 +123,11 @@ describe('ProductsController', () => {
       mockProductsService.update.mockResolvedValue(result);
 
       expect(await controller.update(productId, dto, user)).toEqual(result);
-      expect(mockProductsService.update).toHaveBeenCalledWith(productId, dto, user.id);
+      expect(mockProductsService.update).toHaveBeenCalledWith(
+        productId,
+        dto,
+        user.id,
+      );
     });
   });
 
@@ -127,7 +139,10 @@ describe('ProductsController', () => {
       mockProductsService.remove.mockResolvedValue(undefined);
 
       await controller.remove(productId, user);
-      expect(mockProductsService.remove).toHaveBeenCalledWith(productId, user.id);
+      expect(mockProductsService.remove).toHaveBeenCalledWith(
+        productId,
+        user.id,
+      );
     });
   });
 });

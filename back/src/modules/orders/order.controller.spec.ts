@@ -52,21 +52,31 @@ describe('OrdersController', () => {
 
   describe('create', () => {
     it('should create an order', async () => {
-      const dto: CreateOrderDto = { type: 'delivery', address: 'Test Address', scheduleAt: new Date() } as any;
+      const dto: CreateOrderDto = {
+        type: 'delivery',
+        address: 'Test Address',
+        scheduleAt: new Date(),
+      } as any;
       const user = { id: 1 } as any;
       const result: OrderEntity = { id: 1, ...dto, userId: 1 } as any;
 
       mockOrdersService.create.mockResolvedValue(result);
 
       expect(await controller.create(dto, user)).toEqual(result);
-      expect(mockOrdersService.create).toHaveBeenCalledWith({ ...dto, userId: user.id });
+      expect(mockOrdersService.create).toHaveBeenCalledWith({
+        ...dto,
+        userId: user.id,
+      });
     });
   });
 
   describe('findAll', () => {
     it('should return all orders with pagination', async () => {
       const query: FindOrdersQueryDto = { page: 1, limit: 10 };
-      const result: PaginationResponseDto<OrderEntity> = { items: [], meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 } };
+      const result: PaginationResponseDto<OrderEntity> = {
+        items: [],
+        meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 },
+      };
 
       mockOrdersService.findAll.mockResolvedValue(result);
 
@@ -97,7 +107,11 @@ describe('OrdersController', () => {
       mockOrdersService.update.mockResolvedValue(result);
 
       expect(await controller.update(orderId, dto, user)).toEqual(result);
-      expect(mockOrdersService.update).toHaveBeenCalledWith(orderId, dto, user.id);
+      expect(mockOrdersService.update).toHaveBeenCalledWith(
+        orderId,
+        dto,
+        user.id,
+      );
     });
   });
 
@@ -117,12 +131,18 @@ describe('OrdersController', () => {
     it('should return user orders', async () => {
       const query: FindOrdersQueryDto = { page: 1, limit: 10 };
       const user = { id: 1 } as any;
-      const result: PaginationResponseDto<OrderEntity> = { items: [], meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 } };
+      const result: PaginationResponseDto<OrderEntity> = {
+        items: [],
+        meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 },
+      };
 
       mockOrdersService.getMyOrders.mockResolvedValue(result);
 
       expect(await controller.getMyOrders(user, query)).toEqual(result);
-      expect(mockOrdersService.getMyOrders).toHaveBeenCalledWith(user.id, query);
+      expect(mockOrdersService.getMyOrders).toHaveBeenCalledWith(
+        user.id,
+        query,
+      );
     });
   });
 
@@ -130,12 +150,18 @@ describe('OrdersController', () => {
     it('should return store orders', async () => {
       const query: FindOrdersQueryDto = { page: 1, limit: 10 };
       const storeId = 5;
-      const result: PaginationResponseDto<OrderEntity> = { items: [], meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 } };
+      const result: PaginationResponseDto<OrderEntity> = {
+        items: [],
+        meta: { page: 1, pageSize: 10, total: 0, totalPages: 0 },
+      };
 
       mockOrdersService.getStoreOrders.mockResolvedValue(result);
 
       expect(await controller.getStoreOrders(storeId, query)).toEqual(result);
-      expect(mockOrdersService.getStoreOrders).toHaveBeenCalledWith(storeId, query);
+      expect(mockOrdersService.getStoreOrders).toHaveBeenCalledWith(
+        storeId,
+        query,
+      );
     });
   });
 });

@@ -1,11 +1,11 @@
-import {Test, TestingModule} from '@nestjs/testing';
-import {AuthController} from './auth.controller';
-import {AuthService} from './auth.service';
-import {UserDto} from '../users/dtos';
-import {TokenResponseDto} from '../../common/dtos';
-import {AuthGuard} from '../../guards';
-import {ExecutionContext} from '@nestjs/common';
-import {UserRoleEnum} from "../../common/enums";
+import { Test, TestingModule } from '@nestjs/testing';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { UserDto } from '../users/dtos';
+import { TokenResponseDto } from '../../common/dtos';
+import { AuthGuard } from '../../guards';
+import { ExecutionContext } from '@nestjs/common';
+import { UserRoleEnum } from '../../common/enums';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -52,7 +52,12 @@ describe('AuthController', () => {
       const result: TokenResponseDto = {
         accessToken: 'access',
         refreshToken: 'refresh',
-        userPayload: { userId: 1, email: dto.email, role: UserRoleEnum.USER, isHaveStores: false },
+        userPayload: {
+          userId: 1,
+          email: dto.email,
+          role: UserRoleEnum.USER,
+          isHaveStores: false,
+        },
       };
 
       mockAuthService.register.mockResolvedValue(result);
@@ -68,7 +73,12 @@ describe('AuthController', () => {
       const result: TokenResponseDto = {
         accessToken: 'access',
         refreshToken: 'refresh',
-        userPayload: { userId: 1, email: dto.email, role: UserRoleEnum.USER, isHaveStores: false },
+        userPayload: {
+          userId: 1,
+          email: dto.email,
+          role: UserRoleEnum.USER,
+          isHaveStores: false,
+        },
       };
 
       mockAuthService.login.mockResolvedValue(result);
@@ -84,13 +94,21 @@ describe('AuthController', () => {
       const result: TokenResponseDto = {
         accessToken: 'newAccess',
         refreshToken: 'newRefresh',
-        userPayload: { userId: 1, email: 'test@example.com', role: UserRoleEnum.USER, isHaveStores: false },
+        userPayload: {
+          userId: 1,
+          email: 'test@example.com',
+          role: UserRoleEnum.USER,
+          isHaveStores: false,
+        },
       };
 
       mockAuthService.refreshToken.mockResolvedValue(result);
 
       expect(await controller.refresh(body)).toEqual(result);
-      expect(mockAuthService.refreshToken).toHaveBeenCalledWith(body.userId, body.refreshToken);
+      expect(mockAuthService.refreshToken).toHaveBeenCalledWith(
+        body.userId,
+        body.refreshToken,
+      );
     });
   });
 

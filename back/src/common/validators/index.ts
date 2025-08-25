@@ -1,1 +1,1 @@
-export {IsValidTimezone} from "./timezone.validator"
+export { IsValidTimezone } from './timezone.validator';

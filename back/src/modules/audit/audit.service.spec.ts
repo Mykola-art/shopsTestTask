@@ -29,7 +29,9 @@ describe('AuditService', () => {
     }).compile();
 
     service = module.get<AuditService>(AuditService);
-    auditRepo = module.get<Repository<AuditLogEntity>>(getRepositoryToken(AuditLogEntity));
+    auditRepo = module.get<Repository<AuditLogEntity>>(
+      getRepositoryToken(AuditLogEntity),
+    );
   });
 
   it('should be defined', () => {

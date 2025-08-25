@@ -1,1 +1,1 @@
-export {ConvertTimeByTimezone} from "./convert.time.by.timezone"
+export { ConvertTimeByTimezone } from './convert.time.by.timezone';

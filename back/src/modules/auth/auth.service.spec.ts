@@ -6,7 +6,11 @@ import { AuditService } from '../audit/audit.service';
 import { UserEntity } from '../../entities';
 import { UserRoleEnum } from '../../common/enums';
 import * as bcrypt from 'bcrypt';
-import { UnauthorizedException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 
 jest.mock('../../../src/common/constants/login.constants', () => ({
   MAX_FAILED_ATTEMPTS: 5,
@@ -65,7 +69,9 @@ describe('AuthService', () => {
   describe('validateUser', () => {
     it('should return user if password matches', async () => {
       (usersService.getByEmail as jest.Mock).mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(true));
 
       const user = await service.validateUser('user@test.com', 'password');
       expect(user).toEqual(mockUser);
@@ -73,9 +79,13 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if password invalid', async () => {
       (usersService.getByEmail as jest.Mock).mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(false));
 
-      await expect(service.validateUser('user@test.com', 'wrongpassword')).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.validateUser('user@test.com', 'wrongpassword'),
+      ).rejects.toThrow(UnauthorizedException);
       expect(usersService.saveUser).toHaveBeenCalled();
     });
 
@@ -85,13 +95,17 @@ describe('AuthService', () => {
         lockoutUntil: new Date(Date.now() + 10000),
       });
 
-      await expect(service.validateUser('user@test.com', 'password')).rejects.toThrow(ForbiddenException);
+      await expect(
+        service.validateUser('user@test.com', 'password'),
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it('should throw UnauthorizedException if user not found', async () => {
       (usersService.getByEmail as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.validateUser('unknown@test.com', 'password')).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.validateUser('unknown@test.com', 'password'),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -102,18 +116,30 @@ describe('AuthService', () => {
       jest.spyOn(service as any, 'generateTokens').mockResolvedValue({
         accessToken: 'access',
         refreshToken: 'refresh',
-        userPayload: { userId: 1, email: 'user@test.com', role: UserRoleEnum.USER, isHaveStores: false },
+        userPayload: {
+          userId: 1,
+          email: 'user@test.com',
+          role: UserRoleEnum.USER,
+          isHaveStores: false,
+        },
       });
 
-      const tokens = await service.register({ email: 'user@test.com', password: 'password' } as any);
+      const tokens = await service.register({
+        email: 'user@test.com',
+        password: 'password',
+      } as any);
       expect(tokens.accessToken).toBe('access');
       expect(auditService.log).toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if user exists', async () => {
       (usersService.getByEmail as jest.Mock).mockResolvedValue(mockUser);
-      await expect(service.register({ email: 'user@test.com', password: 'password' } as any))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        service.register({
+          email: 'user@test.com',
+          password: 'password',
+        } as any),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -123,10 +149,18 @@ describe('AuthService', () => {
       jest.spyOn(service as any, 'generateTokens').mockResolvedValue({
         accessToken: 'access',
         refreshToken: 'refresh',
-        userPayload: { userId: 1, email: 'user@test.com', role: UserRoleEnum.USER, isHaveStores: false },
+        userPayload: {
+          userId: 1,
+          email: 'user@test.com',
+          role: UserRoleEnum.USER,
+          isHaveStores: false,
+        },
       });
 
-      const tokens = await service.login({ email: 'user@test.com', password: 'password' } as any);
+      const tokens = await service.login({
+        email: 'user@test.com',
+        password: 'password',
+      } as any);
       expect(tokens.accessToken).toBe('access');
       expect(auditService.log).toHaveBeenCalled();
     });
@@ -134,12 +168,22 @@ describe('AuthService', () => {
 
   describe('refreshToken', () => {
     it('should refresh token successfully', async () => {
-      (usersService.getById as jest.Mock).mockResolvedValue({ ...mockUser, refreshToken: 'hashedRefresh' });
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      (usersService.getById as jest.Mock).mockResolvedValue({
+        ...mockUser,
+        refreshToken: 'hashedRefresh',
+      });
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(true));
       jest.spyOn(service as any, 'generateTokens').mockResolvedValue({
         accessToken: 'access',
         refreshToken: 'refresh',
-        userPayload: { userId: 1, email: 'user@test.com', role: UserRoleEnum.USER, isHaveStores: false },
+        userPayload: {
+          userId: 1,
+          email: 'user@test.com',
+          role: UserRoleEnum.USER,
+          isHaveStores: false,
+        },
       });
 
       const tokens = await service.refreshToken(1, 'refresh');
@@ -148,9 +192,13 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if token invalid', async () => {
       (usersService.getById as jest.Mock).mockResolvedValue(mockUser);
-      jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
+      jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(false));
 
-      await expect(service.refreshToken(1, 'invalid')).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshToken(1, 'invalid')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 

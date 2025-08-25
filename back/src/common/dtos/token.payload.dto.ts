@@ -1,3 +1,3 @@
 export class TokenPayloadDto {
-	id: number
+  id: number;
 }

@@ -37,7 +37,9 @@ describe('OrdersService', () => {
     andWhere: jest.fn().mockReturnThis(),
     skip: jest.fn().mockReturnThis(),
     take: jest.fn().mockReturnThis(),
-    getManyAndCount: jest.fn().mockResolvedValue([mockOrders, mockOrders.length]),
+    getManyAndCount: jest
+      .fn()
+      .mockResolvedValue([mockOrders, mockOrders.length]),
     getOne: jest.fn().mockResolvedValue(mockOrder),
   };
 
@@ -52,7 +54,7 @@ describe('OrdersService', () => {
         {
           provide: getRepositoryToken(OrderEntity),
           useValue: {
-            create: jest.fn().mockImplementation(dto => dto),
+            create: jest.fn().mockImplementation((dto) => dto),
             save: jest.fn().mockResolvedValue(mockOrder),
             findOne: jest.fn().mockResolvedValue(mockOrder),
             update: jest.fn().mockResolvedValue({}),
@@ -108,7 +110,10 @@ describe('OrdersService', () => {
     expect(result.items).toEqual(mockOrders);
     expect(result.meta.total).toEqual(mockOrders.length);
     expect(mockRepository.createQueryBuilder).toHaveBeenCalled();
-    expect(mockQueryBuilder.leftJoin).toHaveBeenCalledWith('order.product', 'product');
+    expect(mockQueryBuilder.leftJoin).toHaveBeenCalledWith(
+      'order.product',
+      'product',
+    );
   });
 
   it('should update an order and log audit', async () => {

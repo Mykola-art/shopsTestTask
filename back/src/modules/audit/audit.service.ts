@@ -6,13 +6,17 @@ import { AuditLogEntity } from '../../entities';
 
 @Injectable()
 export class AuditService {
-	constructor(
-		@InjectRepository(AuditLogEntity)
-		private readonly auditRepository: Repository<AuditLogEntity>,
-	) {}
+  constructor(
+    @InjectRepository(AuditLogEntity)
+    private readonly auditRepository: Repository<AuditLogEntity>,
+  ) {}
 
-	async log(eventType: AuditEventType, userId?: number, metadata?: Record<string, any>):Promise<void> {
-		const log = this.auditRepository.create({ eventType, userId, metadata });
-		await this.auditRepository.save(log);
-	}
+  async log(
+    eventType: AuditEventType,
+    userId?: number,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
+    const log = this.auditRepository.create({ eventType, userId, metadata });
+    await this.auditRepository.save(log);
+  }
 }

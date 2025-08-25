@@ -1,1 +1,1 @@
-export {SanitizePipe} from "./sanitize.pipe"
+export { SanitizePipe } from './sanitize.pipe';
