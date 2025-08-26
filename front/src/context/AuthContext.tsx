@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { refreshToken, logoutUser } from '@/lib/api';
 import { AuthResponse, UserPayload } from '@/lib/types';
-import {getCookie} from "@/utils/getCookie";
+import { getCookie } from 'cookies-next';
 
 interface AuthContextType {
     accessToken: string | null;
