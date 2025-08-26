@@ -67,23 +67,54 @@ export class ProductsService {
 
     let fromInStoreTz = from;
     let toInStoreTz = to;
+    let fromDayTz = from;
+    let toDayTz = to;
 
     if (timezone && day && from && to) {
       const store = await qb.getOne();
       const storeTimezone = store?.store?.timezone;
 
       if (storeTimezone) {
-        fromInStoreTz = ConvertTimeByTimezone(from, timezone, storeTimezone);
-        toInStoreTz = ConvertTimeByTimezone(to, timezone, storeTimezone);
+        const newDateFrom = ConvertTimeByTimezone(day, from, timezone, storeTimezone);
+        fromInStoreTz = newDateFrom.time;
+        fromDayTz = newDateFrom.day;
+
+        const newDateTo = ConvertTimeByTimezone(day, to, timezone, storeTimezone);
+        toInStoreTz = newDateTo.time;
+        toDayTz = newDateTo.day;
       }
     }
 
     if (day && from && to) {
-      qb.andWhere(
-        `product.availability -> :day ->> 'from' <= :from AND product.availability -> :day ->> 'to' >= :to`,
-        { day, from: fromInStoreTz, to: toInStoreTz },
-      );
+      if (fromDayTz === toDayTz) {
+        qb.andWhere(
+          `
+      product.availability ? :day
+      AND product.availability -> :day ->> 'from' <= :from
+      AND product.availability -> :day ->> 'to'   >= :to
+      `,
+          { day: fromDayTz, from: fromInStoreTz, to: toInStoreTz },
+        );
+      } else {
+        qb.andWhere(
+          `
+      (
+        (
+          product.availability ? :fromDay
+          AND product.availability -> :fromDay ->> 'from' <= :from
+        )
+        AND
+        (
+          product.availability ? :toDay
+          AND product.availability -> :toDay ->> 'to' >= :to
+        )
+      )
+      `,
+          { fromDay: fromDayTz, toDay: toDayTz, from: fromInStoreTz, to: toInStoreTz },
+        );
+      }
     }
+
 
     qb.skip((page - 1) * limit).take(limit);
 
@@ -120,7 +151,7 @@ export class ProductsService {
     let timeInStore = time;
 
     if (timezone && storeTimezone) {
-      timeInStore = ConvertTimeByTimezone(time, timezone, storeTimezone);
+      timeInStore = ConvertTimeByTimezone(day, time, timezone, storeTimezone).time;
     }
 
     qb.andWhere(

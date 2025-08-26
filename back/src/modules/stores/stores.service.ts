@@ -55,21 +55,44 @@ export class StoresService {
 
     let fromInStoreTz = from;
     let toInStoreTz = to;
+    let fromDayTz = day;
+    let toDayTz = day;
     if (timezone && day && from && to) {
       const store = await qb.getOne();
       const storeTimezone = store?.timezone;
       if (storeTimezone) {
-        fromInStoreTz = ConvertTimeByTimezone(from, timezone, storeTimezone);
-        toInStoreTz = ConvertTimeByTimezone(to, timezone, storeTimezone);
+        const newTimeFrom = ConvertTimeByTimezone(day, from, timezone, storeTimezone);
+        fromInStoreTz = newTimeFrom.time
+        fromDayTz = newTimeFrom.day
+        const newTimeTo = ConvertTimeByTimezone(day, to, timezone, storeTimezone);
+        toInStoreTz = newTimeTo.time
+        toDayTz = newTimeTo.day
       }
     }
 
     if (day && from && to) {
-      qb.andWhere(
-        `store.operatingHours -> :day ->> 'from' <= :from AND store.operatingHours -> :day ->> 'to' >= :to`,
-        { day, from: fromInStoreTz, to: toInStoreTz },
-      );
+      if (fromDayTz === toDayTz) {
+        qb.andWhere(
+          `
+      store.operatingHours ? :day
+      AND (store.operatingHours -> :day ->> 'from')::time <= :from::time
+      AND (store.operatingHours -> :day ->> 'to')::time   >= :to::time
+      `,
+          { day: fromDayTz, from: fromInStoreTz, to: toInStoreTz },
+        );
+      } else {
+        qb.andWhere(
+          `
+      store.operatingHours ? :fromDay
+      AND store.operatingHours ? :toDay
+      AND (store.operatingHours -> :fromDay ->> 'from')::time <= :from::time
+      AND (store.operatingHours -> :toDay   ->> 'to')::time   >= :to::time
+      `,
+          { fromDay: fromDayTz, toDay: toDayTz, from: fromInStoreTz, to: toInStoreTz },
+        );
+      }
     }
+
 
     qb.skip((page - 1) * limit).take(limit);
     const [data, total] = await qb.getManyAndCount();
@@ -114,13 +137,21 @@ export class StoresService {
     const storeTimezone = store?.timezone;
 
     let timeInStore = time;
+    let dayInStore = day;
+
     if (timezone && storeTimezone) {
-      timeInStore = ConvertTimeByTimezone(time, timezone, storeTimezone);
+      const converted = ConvertTimeByTimezone(day, time, timezone, storeTimezone);
+      timeInStore = converted.time;
+      dayInStore = converted.day;
     }
 
     qb.andWhere(
-      `store.operatingHours -> :day ->> 'from' <= :time AND store.operatingHours -> :day ->> 'to' >= :time`,
-      { day, time: timeInStore },
+      `
+  store.operatingHours ? :day
+  AND (store.operatingHours -> :day ->> 'from')::time <= :time::time
+  AND (store.operatingHours -> :day ->> 'to')::time   >= :time::time
+  `,
+      { day: dayInStore, time: timeInStore },
     );
 
     qb.skip((page - 1) * limit).take(limit);

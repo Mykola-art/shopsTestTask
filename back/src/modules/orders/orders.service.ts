@@ -152,21 +152,28 @@ export class OrdersService {
     let scheduleFrom = query.scheduleFrom;
     let scheduleTo = query.scheduleTo;
 
-    if ((query.scheduleFrom || query.scheduleTo) && query.timezone) {
+    if ((query.scheduleFrom || query.scheduleTo) && query.timezone && query.day) {
       const order = await qb.getOne();
+      const storeTz = order?.timezone ?? 'UTC';
+
       if (query.scheduleFrom) {
-        scheduleFrom = ConvertTimeByTimezone(
+        const converted = ConvertTimeByTimezone(
+          query.day,
           query.scheduleFrom.toISOString(),
           query.timezone,
-          order?.timezone ?? 'UTC',
+          storeTz,
         );
+        scheduleFrom = converted.datetime.toJSDate(); 
       }
+
       if (query.scheduleTo) {
-        scheduleTo = ConvertTimeByTimezone(
+        const converted = ConvertTimeByTimezone(
+          query.day,
           query.scheduleTo.toISOString(),
           query.timezone,
-          order?.timezone ?? 'UTC',
+          storeTz,
         );
+        scheduleTo = converted.datetime.toJSDate();
       }
     }
 

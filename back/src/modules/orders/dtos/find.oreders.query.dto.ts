@@ -42,6 +42,11 @@ export class FindOrdersQueryDto {
   @IsDateString()
   scheduleTo?: Date;
 
+  @ApiProperty({ example: 'Monday', required: false })
+  @IsOptional()
+  @IsString()
+  day?: string;
+
   @ApiPropertyOptional({
     example: 'London',
     description: 'Filter by address (like)',
