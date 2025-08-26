@@ -63,7 +63,6 @@ export class ProductsController {
     description: 'Products successfully returned',
     type: PaginationResponseDto<ProductEntity>,
   })
-  @ApiQuery({ type: FindProductsQueryDto })
   findAll(
     @Query() query: FindProductsQueryDto,
   ): Promise<PaginationResponseDto<ProductEntity>> {

@@ -67,7 +67,6 @@ export class StoresController {
     description: 'Store successfully returned',
     type: PaginationResponseDto<StoreEntity>,
   })
-  @ApiQuery({ type: FindStoresQueryDto })
   findAll(
     @Query() query: FindStoresQueryDto,
   ): Promise<PaginationResponseDto<StoreEntity>> {
