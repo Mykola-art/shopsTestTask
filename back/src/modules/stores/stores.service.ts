@@ -75,6 +75,8 @@ export class StoresService {
         qb.andWhere(
           `
       store.operatingHours ? :day
+      AND (store.operatingHours -> :day ->> 'from') <> ''
+      AND (store.operatingHours -> :day ->> 'to')   <> ''
       AND (store.operatingHours -> :day ->> 'from')::time <= :from::time
       AND (store.operatingHours -> :day ->> 'to')::time   >= :to::time
       `,
@@ -85,6 +87,8 @@ export class StoresService {
           `
       store.operatingHours ? :fromDay
       AND store.operatingHours ? :toDay
+      AND (store.operatingHours -> :day ->> 'from') <> ''
+      AND (store.operatingHours -> :day ->> 'to')   <> ''
       AND (store.operatingHours -> :fromDay ->> 'from')::time <= :from::time
       AND (store.operatingHours -> :toDay   ->> 'to')::time   >= :to::time
       `,
@@ -148,6 +152,8 @@ export class StoresService {
     qb.andWhere(
       `
   store.operatingHours ? :day
+  AND (store.operatingHours -> :day ->> 'from') <> ''
+  AND (store.operatingHours -> :day ->> 'to')   <> ''
   AND (store.operatingHours -> :day ->> 'from')::time <= :time::time
   AND (store.operatingHours -> :day ->> 'to')::time   >= :time::time
   `,

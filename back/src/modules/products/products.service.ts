@@ -89,27 +89,31 @@ export class ProductsService {
       if (fromDayTz === toDayTz) {
         qb.andWhere(
           `
-      product.availability ? :day
-      AND product.availability -> :day ->> 'from' <= :from
-      AND product.availability -> :day ->> 'to'   >= :to
-      `,
+  product.availability ? :day
+  AND (product.availability -> :day ->> 'from') <> ''
+  AND (product.availability -> :day ->> 'to')   <> ''
+  AND (product.availability -> :day ->> 'from')::time <= :from::time
+  AND (product.availability -> :day ->> 'to')::time   >= :to::time
+  `,
           { day: fromDayTz, from: fromInStoreTz, to: toInStoreTz },
         );
       } else {
         qb.andWhere(
           `
-      (
-        (
-          product.availability ? :fromDay
-          AND product.availability -> :fromDay ->> 'from' <= :from
-        )
-        AND
-        (
-          product.availability ? :toDay
-          AND product.availability -> :toDay ->> 'to' >= :to
-        )
-      )
-      `,
+  (
+    (
+      product.availability ? :fromDay
+      AND (product.availability -> :fromDay ->> 'from') <> ''
+      AND (product.availability -> :fromDay ->> 'from')::time <= :from::time
+    )
+    AND
+    (
+      product.availability ? :toDay
+      AND (product.availability -> :toDay ->> 'to') <> ''
+      AND (product.availability -> :toDay ->> 'to')::time >= :to::time
+    )
+  )
+  `,
           { fromDay: fromDayTz, toDay: toDayTz, from: fromInStoreTz, to: toInStoreTz },
         );
       }
@@ -155,7 +159,9 @@ export class ProductsService {
     }
 
     qb.andWhere(
-      `product.availability -> :day ->> 'from' <= :time
+      `(product.availability -> :day ->> 'from') <> ''
+  AND (product.availability -> :day ->> 'to')   <> ''
+     AND product.availability -> :day ->> 'from' <= :time
      AND product.availability -> :day ->> 'to' >= :time`,
       { day, time: timeInStore },
     );
