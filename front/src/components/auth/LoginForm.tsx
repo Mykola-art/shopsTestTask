@@ -41,7 +41,6 @@ export default function LoginForm() {
             } else {
                 setError('root', { message: error.message || 'Login failed' });
             }
-        } finally {
             setIsLoading(false);
         }
     };

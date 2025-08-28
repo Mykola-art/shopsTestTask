@@ -13,6 +13,8 @@ import {DAYS_OF_WEEK} from "@/lib/constants";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ArrowLeft } from 'lucide-react';
+import {GoBackButton} from "@/components/ui/GoBackButton/GoBackButton";
+import {getTimezoneAbbreviation} from "@/utils/getTimezoneAbbreviation";
 
 const storeSchema = z.object({
     slug: z
@@ -20,7 +22,7 @@ const storeSchema = z.object({
         .min(3, { message: 'Slug must be at least 3 characters' })
         .regex(/^[a-z0-9-]+$/, { message: 'Slug can only contain lowercase letters, numbers, and hyphens' }),
     name: z.string().min(3, { message: 'Name must be at least 3 characters' }),
-    address: z.string().min(5, { message: 'Address must be at least 5 characters' }),
+    address: z.string().min(3, { message: 'Address must be at least 3 characters' }),
     timezone: z.string().min(1, { message: 'Timezone is required' }),
     lat: z.number().min(-90).max(90, { message: 'Latitude must be between -90 and 90' }).optional(),
     lng: z.number().min(-180).max(180, { message: 'Longitude must be between -180 and 180' }).optional(),
@@ -107,13 +109,7 @@ export default function CreateStoreForm() {
 
     return (
         <div className={styles.container}>
-            <button
-                onClick={() => router.push('/')}
-                className={styles.backButton}
-            >
-                <ArrowLeft size={20} />
-                Back
-            </button>
+            <GoBackButton />
             <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
                 <h1 className={styles.title}>Create a New Store</h1>
 

@@ -3,12 +3,15 @@ import {
     AuthFormData,
     AuthResponse,
     CreateStoreData,
+    ProductsFilter,
+    ProductsResponse,
     Store,
     StoresFilter,
     StoresResponse,
     UpdateStoreData
 } from './types';
 import { getCookie } from 'cookies-next';
+import {toast} from "react-toastify";
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -25,6 +28,7 @@ api.interceptors.request.use(async (config) => {
         '/api/v1/stores',
         '/api/v1/stores/my',
         '/api/v1/stores/',
+        '/api/v1/products',
     ];
     if (protectedEndpoints.some((endpoint) => config.url?.includes(endpoint))) {
         const accessToken = getCookie('accessToken');
@@ -50,7 +54,10 @@ api.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
         if (error.response?.status === 429) {
-            throw new Error('Too many requests, please try again later');
+            toast.error('Too many requests, please try again later', {
+                position: 'top-center',
+                autoClose: 3000,
+            });
         }
         if (error.response?.status === 401) {
             throw new Error('Invalid credentials');
@@ -105,6 +112,11 @@ export const updateStore = async (id: number, data: UpdateStoreData): Promise<St
 
 export const deleteStore = async (id: number): Promise<void> => {
     await api.delete(`/api/v1/stores/${id}`);
+};
+
+export const getStoreProducts = async (filters: ProductsFilter): Promise<ProductsResponse> => {
+    const response = await api.get<ProductsResponse>('/api/v1/products', { params: filters });
+    return response.data;
 };
 
 export default api;

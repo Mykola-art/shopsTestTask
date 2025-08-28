@@ -3,15 +3,18 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useRouter } from 'next/navigation';
-import { getStores } from '@/lib/api';
+import {usePathname, useRouter, useSearchParams} from 'next/navigation';
+import {getStores, getUserStores} from '@/lib/api';
 import sanitizeHtml from 'sanitize-html';
 import { getTimeZones } from '@vvo/tzdb';
 import { DAYS_OF_WEEK } from '@/lib/constants';
 import styles from './StoreList.module.scss';
 import Link from 'next/link';
 import { StoresFilter, StoresResponse } from '@/lib/types';
-import { convertToLocalTime } from '@/utils/timeConverter';
+import {getUserTzdbTimeZone} from "@/utils/getUserTzdbTimeZone";
+import {Loader} from "@/components/ui/Loader/Loader";
+import {getStoreCurrentTime} from "@/utils/getStoreLocalTime";
+import {GoBackButton} from "@/components/ui/GoBackButton/GoBackButton";
 
 const filterSchema = z.object({
     name: z.string().optional(),
@@ -24,40 +27,47 @@ const filterSchema = z.object({
 
 type FilterFormData = z.infer<typeof filterSchema>;
 
-interface StoreListProps {
-    initialData: StoresResponse;
-    initialFilters: StoresFilter;
+const initialStoreResponse = {
+    meta: {
+        page: 1,
+        pageSize: 10,
+        totalPages: 1,
+        total: 0,
+    },
+    items: [],
 }
 
-export default function StoreList({ initialData, initialFilters }: StoreListProps) {
-    const [storesResponse, setStoresResponse] = useState<StoresResponse>(initialData);
+export default function StoreList() {
+    const [storesResponse, setStoresResponse] = useState<StoresResponse>(initialStoreResponse);
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
     const timeZones = getTimeZones().map((tz) => tz.name);
+    const pathname = usePathname();
+    const router = useRouter();
+
+    const isMyStoresPage = pathname === '/stores/my';
+    const searchParams = useSearchParams();
+    const paramsString = searchParams.toString();
 
     const { register, handleSubmit, setValue, watch, reset } = useForm<FilterFormData>({
         resolver: zodResolver(filterSchema),
-        defaultValues: initialFilters,
     });
 
-    const [timezoneInput, setTimezoneInput] = useState(initialFilters.timezone || '');
-
-    const areFiltersEmpty = () => {
-        const values = watch();
-        return !values.name && !values.address && !values.timezone && !values.day && !values.from && !values.to;
-    };
+    const [timezoneInput, setTimezoneInput] = useState(getUserTzdbTimeZone() || '');
 
     useEffect(() => {
-        if (areFiltersEmpty() && initialData.meta.total > initialData.items.length) {
-            fetchStores({ page: 1 });
-        }
+        fetchStores({ page: 1 });
     }, []);
 
     const fetchStores = async (filters: StoresFilter) => {
         setIsLoading(true);
         try {
-            const response = await getStores(filters);
-            setStoresResponse(response);
+            if (isMyStoresPage) {
+                const response = await getUserStores();
+                setStoresResponse({...initialStoreResponse, items: response});
+            } else {
+                const response = await getStores(filters);
+                setStoresResponse(response);
+            }
         } catch (error) {
             console.error('Failed to fetch stores:', error);
         } finally {
@@ -73,21 +83,36 @@ export default function StoreList({ initialData, initialFilters }: StoreListProp
             timezone: data.timezone ? sanitizeHtml(data.timezone, { allowedTags: [], allowedAttributes: {} }) : undefined,
             day: data.day ? sanitizeHtml(data.day, { allowedTags: [], allowedAttributes: {} }) : undefined,
             from: data.from ? sanitizeHtml(data.from, { allowedTags: [], allowedAttributes: {} }) : undefined,
-            to: data.to ? sanitizeHtml(data.to, { allowedTags: [], allowedAttributes: {} }) : undefined,
+            to: data.from ? sanitizeHtml(data.from, { allowedTags: [], allowedAttributes: {} }) : undefined,
             page: storesResponse.meta.page,
             limit: storesResponse.meta.pageSize,
         };
+
+        const params = new URLSearchParams();
+
+        if (data.timezone) {
+            params.set('tz', data.timezone);
+        }
+        if (data.day) {
+            params.set('day', data.day);
+        }
+        if (data.from) {
+            params.set('time', data.from);
+        }
+
+        router.push(`?${params.toString()}`);
         fetchStores(sanitizedData);
     };
 
     const handlePageChange = (newPage: number) => {
+        const selectedTime = watch('from');
         const filters: StoresFilter = {
             name: watch('name'),
             address: watch('address'),
             timezone: watch('timezone'),
             day: watch('day'),
-            from: watch('from'),
-            to: watch('to'),
+            from: selectedTime,
+            to: selectedTime,
             page: newPage,
             limit: storesResponse.meta.pageSize,
         };
@@ -104,15 +129,19 @@ export default function StoreList({ initialData, initialFilters }: StoreListProp
             to: '',
         });
         setTimezoneInput('');
+        router.push(pathname);
         fetchStores({ page: 1 });
     };
 
     return (
         <div className={styles.storeList}>
+            {isMyStoresPage && <GoBackButton />}
             <div className={styles.header}>
-                <Link href="/stores/create" className={styles.createButton}>
-                    Create a New Store
-                </Link>
+                {isMyStoresPage && (
+                    <Link href="/stores/create" className={styles.createButton}>
+                        Create a New Store
+                    </Link>
+                )}
                 <form onSubmit={handleSubmit(onSubmit)} className={styles.filterForm}>
                     <div className={styles.filterField}>
                         <input
@@ -171,17 +200,8 @@ export default function StoreList({ initialData, initialFilters }: StoreListProp
                             placeholder="From"
                         />
                     </div>
-                    <div className={styles.filterField}>
-                        <input
-                            id="to"
-                            type="time"
-                            {...register('to')}
-                            className={styles.input}
-                            placeholder="To"
-                        />
-                    </div>
                     <button type="submit" className={styles.filterButton} disabled={isLoading}>
-                        {isLoading ? 'Filtering...' : 'Filter'}
+                        Filter
                     </button>
                     <button
                         type="button"
@@ -195,44 +215,42 @@ export default function StoreList({ initialData, initialFilters }: StoreListProp
             </div>
 
             {isLoading ? (
-                <p className={styles.loading}>Loading...</p>
+                <Loader />
             ) : storesResponse.items.length === 0 ? (
                 <p className={styles.noResults}>No stores found.</p>
             ) : (
                 <ul className={styles.storeGrid}>
-                    {storesResponse.items.map((store) => (
-                        <li key={store.id} className={styles.storeCard}>
-                            <div className={styles.storeHeader}>
-                                <h3 className={styles.storeName}>{store.name}</h3>
-                                <span className={styles.storeSlug}>{store.slug}</span>
-                            </div>
-                            <div className={styles.storeDetails}>
-                                <div className={styles.detailItem}>
-                                    <strong>Address:</strong> {store.address}
-                                </div>
-                                <div className={styles.detailItem}>
-                                    <strong>Timezone:</strong> {store.timezone}
-                                </div>
-                                <div className={styles.detailItem}>
-                                    <strong>Hours (Local Time):</strong>
-                                    <ul className={styles.hoursList}>
-                                        {DAYS_OF_WEEK.map((day) => (
-                                            store.operatingHours[day] && (
-                                                <li key={day}>
-                                                    {day}: {convertToLocalTime(store.operatingHours[day].from, day, store.timezone)?.from} -{' '}
-                                                    {convertToLocalTime(store.operatingHours[day].to, day, store.timezone)?.to}
-                                                </li>
-                                            )
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        </li>
-                    ))}
+                    {storesResponse.items.map((store) => {
+                        const storeCurrentTime = getStoreCurrentTime(store.timezone);
+                        return (
+                            <Link
+                                key={store.id}
+                                href={`/stores/${store.id}/products?${paramsString}`}
+                                className={styles.storeLink}
+                            >
+                                <li className={styles.storeCard}>
+                                    <div className={styles.storeHeader}>
+                                        <h3 className={styles.storeName}>{store.name}</h3>
+                                        <span className={styles.storeSlug}>{store.slug}</span>
+                                    </div>
+                                    <div className={styles.storeDetails}>
+                                        <div className={styles.detailItem}>
+                                            <strong>Address:</strong> {store.address}
+                                        </div>
+                                        <div className={styles.detailItem}>
+                                            <strong>Timezone:</strong> {store.timezone}
+                                        </div>
+                                        <div className={styles.detailItem}>
+                                            <strong>Local Time:</strong> {storeCurrentTime}
+                                        </div>
+                                    </div>
+                                </li>
+                            </Link>
+                    )})}
                 </ul>
             )}
 
-            {storesResponse.meta.totalPages > 1 && (
+            {!isMyStoresPage && storesResponse.meta.totalPages > 1 && (
                 <div className={styles.pagination}>
                     <button
                         onClick={() => handlePageChange(storesResponse.meta.page - 1)}
@@ -242,8 +260,8 @@ export default function StoreList({ initialData, initialFilters }: StoreListProp
                         Previous
                     </button>
                     <span className={styles.pageInfo}>
-            Page {storesResponse.meta.page} of {storesResponse.meta.totalPages}
-          </span>
+                        Page {storesResponse.meta.page} of {storesResponse.meta.totalPages}
+                    </span>
                     <button
                         onClick={() => handlePageChange(storesResponse.meta.page + 1)}
                         disabled={storesResponse.meta.page >= storesResponse.meta.totalPages}

@@ -57,7 +57,7 @@ export interface ProductModifier {
 
 export interface Product {
     id: number;
-    store: string;
+    store: Store;
     storeId: number;
     name: string;
     price: number;
@@ -114,12 +114,35 @@ export interface StoresResponse {
     items: Store[];
 }
 
+export interface ProductsResponse {
+    meta: {
+        page: number;
+        pageSize: number;
+        totalPages: number;
+        total: number;
+    };
+    items: Product[];
+}
+
 export interface StoresFilter {
     page?: number;
     limit?: number;
     timezone?: string;
     name?: string;
     address?: string;
+    day?: string;
+    from?: string;
+    to?: string;
+}
+
+export interface ProductsFilter {
+    storeId: number;
+    page?: number;
+    limit?: number;
+    timezone?: string;
+    name?: string;
+    priceFrom?: string;
+    priceTo?: string;
     day?: string;
     from?: string;
     to?: string;

@@ -1,12 +1,11 @@
-import styles from './Home.module.scss';
 import StoreList from "@/components/stores/StoreList/StoreList";
+import styles from "@/app/Home.module.scss";
 
-export default async function Home() {
-
+export default async function MyStoresPage() {
     return (
         <main className={styles.main}>
             <div className={styles.container}>
-                <StoreList />
+                <StoreList/>
             </div>
         </main>
     );

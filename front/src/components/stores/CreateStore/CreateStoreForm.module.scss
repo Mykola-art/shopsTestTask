@@ -78,23 +78,6 @@
   }
 }
 
-.backButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: none;
-  color: #0070f3;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  padding: 0;
-
-  &:hover {
-    color: #005bb5;
-  }
-}
-
 @media (max-width: 600px) {
   .container {
     padding: 1rem;

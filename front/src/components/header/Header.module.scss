@@ -20,7 +20,33 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: #333;
+  text-decoration: none;
 }
+
+.buttonsContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem
+}
+
+.iconButton {
+  display: flex;
+  padding: 5px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  background: #ffffff;
+  border-radius: 9999px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: #f9fafb;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  }
+
+ }
 
 .logoutButton {
   background-color: #e53e3e;
