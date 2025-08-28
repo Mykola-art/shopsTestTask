@@ -39,7 +39,7 @@ root/
 ````
 
 - Backend branch: `feature/backend`
-- Frontend branch: `feature/frontend`
+- Frontend branch: `feature/front`
 
 ---
 
@@ -66,7 +66,7 @@ root/
 
 2. Switch to the frontend branch:
    ```bash
-   git checkout feature/frontend
+   git checkout feature/front
    ```
 
 3. Navigate to the frontend folder:
