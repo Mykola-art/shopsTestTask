@@ -4,7 +4,7 @@ import {HoursList} from "@/components/hours/HoursList/HoursList";
 import { useAuth } from '@/context/AuthContext';
 import {Store} from "@/lib/types";
 import {useState} from "react";
-import {deleteStore, getStores, getUserStores} from "@/lib/api";
+import {deleteStore} from "@/lib/api";
 import {Dialog} from "@/components/ui/Dialog/Dialog";
 import { Trash } from 'lucide-react';
 import {toast} from "react-toastify";
@@ -12,14 +12,12 @@ import {useRouter} from "next/navigation";
 
 type StoreInfoProps = {
     store: Store,
+    isUserAdmin: boolean,
 }
 
-export const StoreInfo = ({ store }: StoreInfoProps) => {
+export const StoreInfo = ({ store, isUserAdmin}: StoreInfoProps) => {
     const [isDeleteDialog, setIsDeleteDialog] = useState(false);
     const router = useRouter();
-    const { user } = useAuth();
-    const userId = user?.userId;
-    const isUserAdmin = store.admin.id === userId;
 
     const handleOpenDeleteDialog = () => {
         setIsDeleteDialog(true);
@@ -49,6 +47,10 @@ export const StoreInfo = ({ store }: StoreInfoProps) => {
                 autoClose: 3000,
             });
         }
+    }
+
+    if (!store) {
+        return null;
     }
 
     return (

@@ -147,3 +147,13 @@ export interface ProductsFilter {
     from?: string;
     to?: string;
 }
+
+export interface AddProductData {
+    storeId: number;
+    name: string;
+    price: number;
+    description: string;
+    availability: OperatingHours;
+    modifiers: ProductModifier[];
+    cacheTTL: number;
+}

@@ -48,6 +48,7 @@
 }
 
 .productCard {
+  position: relative;
   background-color: #fff;
   padding: 1rem;
   border-radius: 8px;
@@ -66,12 +67,77 @@
   align-items: center;
 }
 
-.available {
-  color: #28a745;
-  font-weight: 600;
+.deleteProductIcon {
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e53e3e;
+  border: 1px solid #ddd;
+  background: #ffffff;
+  border-radius: 9999px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: #f9fafb;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+  }
 }
 
-.unavailable {
-  color: #999;
-  font-style: italic;
+.buttonsContainer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dialogButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.deleteButton,
+.cancelButton {
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.deleteButton {
+  background-color: #e53e3e;
+
+  &:hover {
+    background-color: #c53030;
+  }
+}
+
+.cancelButton {
+  background-color: #10b981;
+
+  &:hover {
+    background-color: #059669;
+  }
+}
+
+.statusDot {
+  position: absolute;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: gray;
+
+  &[data-available='true'] {
+    background-color: #218838;
+  }
+
+  &[data-available='false'] {
+    background-color: #e53e3e;
+  }
 }

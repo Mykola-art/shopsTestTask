@@ -8,6 +8,7 @@ import {getStoreById, getStoreProducts} from "@/lib/api";
 import {Loader} from "@/components/ui/Loader/Loader";
 import styles from "@/components/stores/StoreContent/StoreContent.module.scss";
 import {GoBackButton} from "@/components/ui/GoBackButton/GoBackButton";
+import {useAuth} from "@/context/AuthContext";
 
 const initialProductsResponse: ProductsResponse = {
     meta:{
@@ -24,6 +25,10 @@ export const StoreContent = () => {
     const [productsResponse, setProductsResponse] = useState<ProductsResponse>(initialProductsResponse);
     const [isLoading, setIsLoading] = useState(true);
     const [store, setStore] = useState<Store>(null);
+
+    const { user } = useAuth();
+    const userId = user?.userId;
+    const isUserAdmin = store?.admin.id === userId;
 
     const fetchStoreInfo = async () => {
         setIsLoading(true);
@@ -49,13 +54,10 @@ export const StoreContent = () => {
         }
     };
 
-
     useEffect(() => {
         fetchStoreInfo();
         fetchProducts({storeId: +storeId});
     }, []);
-
-    console.log("isLoading", isLoading);
 
     if (isLoading) {
         return (
@@ -66,8 +68,12 @@ export const StoreContent = () => {
     return (
         <div className={styles.storeContent}>
             <GoBackButton/>
-            <StoreInfo store={store}/>
-            <ProductsList productsResponse={productsResponse}/>
+            <StoreInfo store={store} isUserAdmin={isUserAdmin}/>
+            <ProductsList
+                productsResponse={productsResponse}
+                isUserAdmin={isUserAdmin}
+                onProductsResponseChange={setProductsResponse}
+            />
         </div>
     )
 }

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {usePathname, useRouter, useSearchParams} from 'next/navigation';
+import {usePathname, useRouter} from 'next/navigation';
 import {getStores, getUserStores} from '@/lib/api';
 import sanitizeHtml from 'sanitize-html';
 import { getTimeZones } from '@vvo/tzdb';
@@ -15,6 +15,7 @@ import {getUserTzdbTimeZone} from "@/utils/getUserTzdbTimeZone";
 import {Loader} from "@/components/ui/Loader/Loader";
 import {getStoreCurrentTime} from "@/utils/getStoreLocalTime";
 import {GoBackButton} from "@/components/ui/GoBackButton/GoBackButton";
+import {getStoreStatus} from "@/utils/getStoreStatus";
 
 const filterSchema = z.object({
     name: z.string().optional(),
@@ -45,8 +46,6 @@ export default function StoreList() {
     const router = useRouter();
 
     const isMyStoresPage = pathname === '/stores/my';
-    const searchParams = useSearchParams();
-    const paramsString = searchParams.toString();
 
     const { register, handleSubmit, setValue, watch, reset } = useForm<FilterFormData>({
         resolver: zodResolver(filterSchema),
@@ -87,20 +86,6 @@ export default function StoreList() {
             page: storesResponse.meta.page,
             limit: storesResponse.meta.pageSize,
         };
-
-        const params = new URLSearchParams();
-
-        if (data.timezone) {
-            params.set('tz', data.timezone);
-        }
-        if (data.day) {
-            params.set('day', data.day);
-        }
-        if (data.from) {
-            params.set('time', data.from);
-        }
-
-        router.push(`?${params.toString()}`);
         fetchStores(sanitizedData);
     };
 
@@ -177,7 +162,7 @@ export default function StoreList() {
                         />
                         <datalist id="timezoneList">
                             {timeZones.map((tz) => (
-                                <option key={tz} value={tz} />
+                                <option key={tz} value={tz}/>
                             ))}
                         </datalist>
                     </div>
@@ -215,17 +200,18 @@ export default function StoreList() {
             </div>
 
             {isLoading ? (
-                <Loader />
+                <Loader/>
             ) : storesResponse.items.length === 0 ? (
                 <p className={styles.noResults}>No stores found.</p>
             ) : (
                 <ul className={styles.storeGrid}>
                     {storesResponse.items.map((store) => {
                         const storeCurrentTime = getStoreCurrentTime(store.timezone);
+                        const storeStatus = getStoreStatus(store.operatingHours, store.timezone);
                         return (
                             <Link
                                 key={store.id}
-                                href={`/stores/${store.id}/products?${paramsString}`}
+                                href={`/stores/${store.id}/products`}
                                 className={styles.storeLink}
                             >
                                 <li className={styles.storeCard}>
@@ -241,7 +227,7 @@ export default function StoreList() {
                                             <strong>Timezone:</strong> {store.timezone}
                                         </div>
                                         <div className={styles.detailItem}>
-                                            <strong>Local Time:</strong> {storeCurrentTime}
+                                            <strong>Time:</strong> {`${storeCurrentTime}(${storeStatus})`}
                                         </div>
                                     </div>
                                 </li>

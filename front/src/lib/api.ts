@@ -1,8 +1,9 @@
 import axios, { AxiosError } from 'axios';
 import {
+    AddProductData,
     AuthFormData,
     AuthResponse,
-    CreateStoreData,
+    CreateStoreData, Product,
     ProductsFilter,
     ProductsResponse,
     Store,
@@ -117,6 +118,15 @@ export const deleteStore = async (id: number): Promise<void> => {
 export const getStoreProducts = async (filters: ProductsFilter): Promise<ProductsResponse> => {
     const response = await api.get<ProductsResponse>('/api/v1/products', { params: filters });
     return response.data;
+};
+
+export const addProduct = async (data: AddProductData): Promise<Product> => {
+    const response = await api.post<Store>('/api/v1/products', data);
+    return response.data;
+};
+
+export const deleteProduct = async (id: number): Promise<void> => {
+    await api.delete(`/api/v1/products/${id}`);
 };
 
 export default api;

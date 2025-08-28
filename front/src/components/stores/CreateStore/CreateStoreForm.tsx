@@ -197,14 +197,14 @@ export default function CreateStoreForm() {
                                 className={styles.timeInput}
                                 placeholder="To"
                             />
-                            {errors.operatingHours?.[day] && (
+                            {(errors.operatingHours && errors.operatingHours?.[day]) && (
                                 <p className={styles.error}>
                                     {errors.operatingHours[day]?.from?.message || errors.operatingHours[day]?.to?.message}
                                 </p>
                             )}
                         </div>
                     ))}
-                    {/*{errors.operatingHours?.message && <p className={styles.error}>{errors.operatingHours.message}</p>}*/}
+                    {errors.operatingHours?.message && <p className={styles.error}>{errors.operatingHours.message}</p>}
                 </div>
 
                 {errors.root && <p className={styles.error}>{errors.root.message}</p>}
