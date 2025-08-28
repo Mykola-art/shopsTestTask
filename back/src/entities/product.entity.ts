@@ -22,7 +22,7 @@ export class ProductEntity {
   id: number;
 
   @ApiProperty({ type: () => StoreEntity })
-  @ManyToOne(() => StoreEntity, (store) => store.products)
+  @ManyToOne(() => StoreEntity, (store) => store.products, {onDelete: 'CASCADE'})
   store: StoreEntity;
 
   @ApiProperty({ example: 1 })

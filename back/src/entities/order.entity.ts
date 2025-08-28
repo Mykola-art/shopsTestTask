@@ -71,6 +71,6 @@ export class OrderEntity {
   @ManyToOne(() => UserEntity)
   user: UserEntity;
 
-  @ManyToOne(() => ProductEntity)
+  @ManyToOne(() => ProductEntity, {onDelete: 'CASCADE'})
   product: ProductEntity;
 }

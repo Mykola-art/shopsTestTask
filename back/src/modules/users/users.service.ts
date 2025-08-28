@@ -28,7 +28,7 @@ export class UsersService {
     });
   }
 
-  async updateRefreshToken(userId: number, refreshToken: string) {
+  async updateRefreshToken(userId: number, refreshToken: string):Promise<void> {
     const hashedToken = await bcrypt.hash(refreshToken, 12);
     const user = await this.getById(userId);
     if (!user) throw new NotFoundException('User not found');
